@@ -81,7 +81,7 @@ public class AuthService {
     private void setAccessTokenCookie(String accessToken, HttpServletResponse response) {
         Cookie cookie = new Cookie("authorise", accessToken);
         cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(true); // ใช้กับ HTTPS เท่านั้น
+        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
         cookie.setPath("/");
         cookie.setValue(accessToken);
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
@@ -91,7 +91,7 @@ public class AuthService {
     private void setAccessRefreshCookie(String sessionId, HttpServletResponse response) {
         Cookie cookie = new Cookie("sessionId", sessionId);
         cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(true); // ใช้กับ HTTPS เท่านั้น
+        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
         cookie.setPath("/");
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
         response.addCookie(cookie);
@@ -100,7 +100,7 @@ public class AuthService {
     private void setUsername(String username, HttpServletResponse response) {
         Cookie cookie = new Cookie("username", username);
         cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(true); // ใช้กับ HTTPS เท่านั้น
+        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
         cookie.setPath("/");
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
         response.addCookie(cookie);
