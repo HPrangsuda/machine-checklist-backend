@@ -1,9 +1,7 @@
 package com.machinechecklist.controller;
 
-import com.machinechecklist.constant.Constant;
 import com.machinechecklist.model.LoginRequest;
 import com.machinechecklist.service.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final Constant constant;
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
 
@@ -26,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        return ResponseEntity.ok(authService.signin(loginRequest, response));
+        return ResponseEntity.ok(authService.signIn(loginRequest, response));
     }
 
 

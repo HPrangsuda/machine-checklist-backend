@@ -35,7 +35,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-    public ResponseEntity<?> signin(LoginRequest loginRequest, HttpServletResponse htresponse) {
+    public ResponseEntity<?> signIn(LoginRequest loginRequest, HttpServletResponse httpResponse) {
         Map<String, Object> response = new HashMap<>();
         try{
             System.out.println(loginRequest.getUsername());
@@ -56,9 +56,9 @@ public class AuthService {
                         .signWith(SignatureAlgorithm.HS512, constant.getJwtSecret())
                         .compact();
                 String refreshToken = refreshTokenService.getRefreshToken(getUSer.getId());
-                setAccessTokenCookie(token, htresponse);
-                setAccessRefreshCookie(refreshToken, htresponse);
-                setUsername(getUSer.getUsername(), htresponse);
+                setAccessTokenCookie(token, httpResponse);
+                setAccessRefreshCookie(refreshToken, httpResponse);
+                setUsername(getUSer.getUsername(), httpResponse);
                 response.put("code", 200);
                 response.put("accessToken", token);
                 response.put("refreshToken", refreshToken);

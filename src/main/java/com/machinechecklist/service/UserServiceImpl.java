@@ -2,7 +2,7 @@ package com.machinechecklist.service;
 
 import com.machinechecklist.model.User;
 import com.machinechecklist.repo.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +15,10 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username)
@@ -43,4 +43,5 @@ public class UserServiceImpl implements UserDetailsService {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_MEMBER"));
     }
+
 }
