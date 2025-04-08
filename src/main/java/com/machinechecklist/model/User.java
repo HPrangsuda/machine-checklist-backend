@@ -26,13 +26,12 @@ public class User {
     private String lastName;
     private String nickName;
 
-    @Enumerated(EnumType.STRING)
     private RoleType role;
 
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false, columnDefinition = "varchar(255)")
+    @Column(nullable = false)
     @JsonIgnore
     private String password;
 

@@ -2,7 +2,7 @@ package com.machinechecklist.service;
 
 import com.machinechecklist.model.User;
 import com.machinechecklist.repo.UserRepo;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +15,10 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-public class UserServiceImpl implements UserDetailsService {
+public class UserDetailService implements UserDetailsService {
 
-    private final UserRepo userRepo;
+    @Autowired
+    private UserRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username)
