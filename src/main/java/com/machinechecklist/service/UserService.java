@@ -22,7 +22,7 @@ public class UserService {
         if(!userRepo.existsByUsername("admin")){
             User user = new User();
             user.setUsername("admin");
-            user.setFirstName("admin");
+            user.setFirstName("administrator");
             user.setRole(RoleType.ADMIN);
             user.setPassword(passwordEncoder.encode("admin"));
             user.setCreateDate(new Timestamp(System.currentTimeMillis()));
