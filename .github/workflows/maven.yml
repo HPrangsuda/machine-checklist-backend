@@ -1,0 +1,65 @@
+name: Deploy Spring Boot App to Azure Server
+
+# Trigger the workflow on push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Set up JDK 21
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21' # Use Java 21 for Spring Boot
+          distribution: 'temurin' # Eclipse Temurin distribution
+
+      # Build the Spring Boot app with Maven
+      - name: Build with Maven
+        run: mvn clean package -DskipTests # Skip tests for faster builds; remove if tests are required
+
+      # Deploy to Azure server: Prepare /opt/acme/source folder via SSH
+      - name: Prepare Source Folder on Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ACME_HOST }}        # Azure server hostname or IP
+          username: ${{ secrets.ACME_USERNAME }} # SSH username
+          key: ${{ secrets.ACME_SSH }}          # SSH private key
+          script: |
+            sudo chmod -R 777 /opt/acme/source
+            sudo rm -rf /opt/acme/source/* # Clear previous contents in source folder
+            exit 0 # Ensure clean exit before file transfer
+
+      # Copy the JAR file to /opt/acme/source on the server
+      - name: Copy JAR to Source Folder on Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ACME_HOST }}
+          username: ${{ secrets.ACME_USERNAME }}
+          key: ${{ secrets.ACME_SSH }}
+          source: "target/*.jar" # Assumes JAR is in target/ folder after Maven build
+          target: "/opt/acme/source"
+          strip_components: 1 # Remove the 'target' prefix from the path
+
+      # Copy files from /opt/acme/source to /opt/acme/machine via SSH
+      - name: Copy Files to Machine Folder via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ACME_HOST }}
+          username: ${{ secrets.ACME_USERNAME }}
+          key: ${{ secrets.ACME_SSH }}
+          script: |
+            sudo chmod -R 777 /opt/acme/machine
+            sudo systemctl stop acme.service
+            sudo rm -rf /opt/acme/machine/* # Clear previous contents in machine folder
+            sudo mv /opt/acme/source/*.jar /opt/acme/machine/app.jar
+             sudo systemctl start acme.service
+            exit 0 # Ensure clean exit
