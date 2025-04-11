@@ -63,17 +63,23 @@ public class MachineService {
     }
 
     public Machine createMachine(Machine machine) throws WriterException, IOException {
-        // Save the machine first to ensure all fields are populated
-        Machine savedMachine = machineRepo.save(machine);
+        // Validate input
+        if (machine.getMachineCode() == null || machine.getMachineCode().isEmpty()) {
+            throw new IllegalArgumentException("Machine code is required");
+        }
 
-        // Generate QR code URL with machineCode instead of id
-        String qrCodeUrl = "http://localhost:4200/machine-checklist/checklist/" + savedMachine.getMachineCode();
-        // Generate QR code and convert to Base64 string
-        String qrCodeBase64 = generateQRCodeBase64(qrCodeUrl);
-        savedMachine.setQrCode(qrCodeBase64);
+        // Check for duplicate
+        if (machineRepo.existsByMachineCode(machine.getMachineCode())) {
+            throw new IllegalStateException("Machine code already exists");
+        }
 
-        // Update the machine with the QR code
-        return machineRepo.save(savedMachine);
+        // Set QR code
+        String qrCodeJson = String.format("{\"status\": true, \"code\": \"%s\"}",
+                machine.getMachineCode());
+        machine.setQrCode(qrCodeJson);
+
+        // Save and return
+        return machineRepo.save(machine);
     }
 
     private String generateQRCodeBase64(String url) throws WriterException, IOException {

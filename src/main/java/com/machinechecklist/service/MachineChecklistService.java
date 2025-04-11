@@ -1,7 +1,6 @@
 package com.machinechecklist.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.machinechecklist.model.MachineChecklist;
 import com.machinechecklist.repo.MachineChecklistRepo;

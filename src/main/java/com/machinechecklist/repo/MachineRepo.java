@@ -16,4 +16,6 @@ public interface MachineRepo extends JpaRepository<Machine, Long> {
     List<Machine> findBySupervisorIdOrManagerId(String personId);
 
     Optional<Machine> findByMachineCode(String machineCode);
+
+    boolean existsByMachineCode(String machineCode);
 }
