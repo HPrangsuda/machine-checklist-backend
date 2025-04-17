@@ -10,6 +10,5 @@ public class MachineType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer machineTypeId;
     private String machineTypeName;
 }

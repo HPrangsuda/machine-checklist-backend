@@ -10,7 +10,6 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String questionId;
     private String questionDetail;
     private String questionDescription;
 }
