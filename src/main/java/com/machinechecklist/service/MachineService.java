@@ -73,24 +73,8 @@ public class MachineService {
             throw new IllegalStateException("Machine code already exists");
         }
 
-        // Set QR code
-        String qrCodeJson = String.format("{\"status\": true, \"code\": \"%s\"}",
-                machine.getMachineCode());
-        machine.setQrCode(qrCodeJson);
-
         // Save and return
         return machineRepo.save(machine);
-    }
-
-    private String generateQRCodeBase64(String url) throws WriterException, IOException {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 200, 200);
-
-        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
-
-        byte[] pngData = pngOutputStream.toByteArray();
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(pngData);
     }
 
     public static class MachineResponse {
@@ -101,10 +85,24 @@ public class MachineService {
             this.machine = machine;
             this.qrCodeImage = qrCodeImage;
         }
+    }
 
-        public Machine getMachine() { return machine; }
-        public void setMachine(Machine machine) { this.machine = machine; }
-        public String getQrCodeImage() { return qrCodeImage; }
-        public void setQrCodeImage(String qrCodeImage) { this.qrCodeImage = qrCodeImage; }
+    public Machine updateMachine(Long id, Machine updatedMachine) {
+        Optional<Machine> existingMachine = machineRepo.findById(id);
+        if (existingMachine.isPresent()) {
+            Machine machine = existingMachine.get();
+            machine.setResponsiblePersonId(updatedMachine.getResponsiblePersonId());
+            machine.setResponsiblePersonName(updatedMachine.getResponsiblePersonName());
+            machine.setSupervisorId(updatedMachine.getSupervisorId());
+            machine.setSupervisorName(updatedMachine.getSupervisorName());
+            machine.setManagerId(updatedMachine.getManagerId());
+            machine.setManagerName(updatedMachine.getManagerName());
+            machine.setFrequency(updatedMachine.getFrequency());
+            machine.setMachineStatus(updatedMachine.getMachineStatus());
+            machine.setMachineTypeName(updatedMachine.getMachineTypeName());
+            return machineRepo.save(machine);
+        } else {
+            throw new RuntimeException("Machine not found with id: " + id);
+        }
     }
 }

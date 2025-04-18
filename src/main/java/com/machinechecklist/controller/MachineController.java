@@ -64,5 +64,9 @@ public class MachineController {
         }
     }
 
-
+    @PutMapping("/{id}")
+    public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine machine) {
+        Machine updatedMachine = machineService.updateMachine(id, machine);
+        return ResponseEntity.ok(updatedMachine);
+    }
 }
