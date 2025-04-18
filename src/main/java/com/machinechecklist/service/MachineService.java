@@ -90,6 +90,7 @@ public class MachineService {
             this.machine = machine;
             this.qrCodeImage = qrCodeImage;
         }
+
     }
 
     public Machine updateMachine(Long id, Machine updatedMachine) {
