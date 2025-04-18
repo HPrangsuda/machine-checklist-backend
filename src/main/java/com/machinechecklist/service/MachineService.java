@@ -91,6 +91,10 @@ public class MachineService {
             this.qrCodeImage = qrCodeImage;
         }
 
+        public Machine getMachine() { return machine; }
+        public void setMachine(Machine machine) { this.machine = machine; }
+        public String getQrCodeImage() { return qrCodeImage; }
+        public void setQrCodeImage(String qrCodeImage) { this.qrCodeImage = qrCodeImage; }
     }
 
     public Machine updateMachine(Long id, Machine updatedMachine) {
