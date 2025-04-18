@@ -73,6 +73,11 @@ public class MachineService {
             throw new IllegalStateException("Machine code already exists");
         }
 
+        // Set QR code
+        String qrCodeJson = String.format("{\"status\": true, \"code\": \"%s\"}",
+                machine.getMachineCode());
+        machine.setQrCode(qrCodeJson);
+
         // Save and return
         return machineRepo.save(machine);
     }
@@ -85,6 +90,11 @@ public class MachineService {
             this.machine = machine;
             this.qrCodeImage = qrCodeImage;
         }
+
+        public Machine getMachine() { return machine; }
+        public void setMachine(Machine machine) { this.machine = machine; }
+        public String getQrCodeImage() { return qrCodeImage; }
+        public void setQrCodeImage(String qrCodeImage) { this.qrCodeImage = qrCodeImage; }
     }
 
     public Machine updateMachine(Long id, Machine updatedMachine) {
