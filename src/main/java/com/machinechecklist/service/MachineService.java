@@ -7,7 +7,9 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.repo.MachineRepo;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -62,7 +64,7 @@ public class MachineService {
         return machineRepo.findByMachineCode(machineCode).orElse(null);
     }
 
-    public Machine createMachine(Machine machine) throws WriterException, IOException {
+    public Machine createMachine(Machine machine) {
         // Validate input
         if (machine.getMachineCode() == null || machine.getMachineCode().isEmpty()) {
             throw new IllegalArgumentException("Machine code is required");
@@ -82,6 +84,8 @@ public class MachineService {
         return machineRepo.save(machine);
     }
 
+    @Setter
+    @Getter
     public static class MachineResponse {
         private Machine machine;
         private String qrCodeImage;
@@ -91,10 +95,6 @@ public class MachineService {
             this.qrCodeImage = qrCodeImage;
         }
 
-        public Machine getMachine() { return machine; }
-        public void setMachine(Machine machine) { this.machine = machine; }
-        public String getQrCodeImage() { return qrCodeImage; }
-        public void setQrCodeImage(String qrCodeImage) { this.qrCodeImage = qrCodeImage; }
     }
 
     public Machine updateMachine(Long id, Machine updatedMachine) {
