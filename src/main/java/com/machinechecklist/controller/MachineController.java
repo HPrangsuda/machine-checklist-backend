@@ -29,20 +29,20 @@ public class MachineController {
         return machineService.getAllMachines();
     }
 
-    @GetMapping("/public/responsible/{personId}")
+    @GetMapping("responsible/{personId}")
     public ResponseEntity<List<Machine>> getMachinesByResponsiblePerson(@PathVariable String personId) {
         List<Machine> machines = machineService.getMachinesByResponsiblePerson(personId);
         return ResponseEntity.ok(machines);
     }
 
-    @GetMapping("/supervisor/responsible-all/{personId}")
+    @GetMapping("/responsible-all/{personId}")
     @PreAuthorize("hasRole('SUPERVISOR')")
     public ResponseEntity<List<Machine>> getMachinesByResponsibleAll(@PathVariable String personId) {
         List<Machine> machines = machineService.getMachinesByResponsibleAll(personId);
         return ResponseEntity.ok(machines);
     }
 
-    @GetMapping("/public/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<MachineService.MachineResponse> getMachineWithQRCode(@PathVariable Long id) {
         try {
             MachineService.MachineResponse response = machineService.getMachineWithQRCode(id);
@@ -52,7 +52,7 @@ public class MachineController {
         }
     }
 
-    @GetMapping("/public/machine-code/{machineCode}")
+    @GetMapping("/machine-code/{machineCode}")
     public ResponseEntity<Machine> getMachineByMachineCode(@PathVariable String machineCode) {
         try {
             Machine machine = machineService.getMachineByMachineCode(machineCode);
@@ -83,7 +83,7 @@ public class MachineController {
         }
     }
 
-    @GetMapping("/public/image/{fileName}")
+    @GetMapping("/image/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
         try {
             Path filePath = fileStorageService.getFilePath(fileName);
@@ -107,7 +107,7 @@ public class MachineController {
         return ResponseEntity.ok(updatedMachine);
     }
 
-    @DeleteMapping("/admin/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMachine(@PathVariable Long id) {
         machineService.deleteMachine(id);
