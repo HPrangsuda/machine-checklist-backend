@@ -16,7 +16,24 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
+  quartz:
+    job-store-type: jdbc # เปลี่ยนเป็น jdbc ใน production
+    jdbc:
+      initialize-schema: always # สร้างตาราง Quartz อัตโนมัติ (ใช้ใน dev)
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: ChecklistScheduler
+            instanceId: AUTO
+
 jwt:
   secret: PP/e22h/W97Ahtx26r/fGTAnQQgvwvN7OPyP5Kp7NT0bnYvwSUJZ/DSwG183hkLH
   secrete-exp: 864000000
   secrete-exp-min: 60
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG
+    org.springframework: INFO
+    org.quartz: INFO

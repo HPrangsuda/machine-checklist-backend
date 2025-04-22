@@ -115,4 +115,12 @@ public class MachineService {
             throw new RuntimeException("Machine not found with id: " + id);
         }
     }
+
+    public void deleteMachine(Long id) {
+        if (machineRepo.existsById(id)) {
+            machineRepo.deleteById(id);
+        } else {
+            throw new RuntimeException("Machine not found with id: " + id);
+        }
+    }
 }
