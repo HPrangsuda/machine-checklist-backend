@@ -16,7 +16,7 @@ import java.util.List;
 public class ScheduledResetService {
     private final MachineChecklistRepo checklistRepo;
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void checkAndResetStatus() {
         List<MachineChecklist> checklists = checklistRepo.findByCheckStatus("true");
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS); // ปัดเป็นวันที่ ไม่รวมเวลา
