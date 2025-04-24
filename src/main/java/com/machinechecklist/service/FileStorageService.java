@@ -16,27 +16,22 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FileStorageService {
-    @Value("${file.upload-dir:./uploads}")
-    private String uploadDir;
+    private final String uploadDir = "uploads/"; // ปรับ path ตามต้องการ
 
     public String storeFile(MultipartFile file) throws IOException {
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(uploadPath);
-
-        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
-        String fileExtension = "";
-        if (originalFileName.contains(".")) {
-            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        // สร้างโฟลเดอร์ถ้ายังไม่มี
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
         }
-        String fileName = UUID.randomUUID().toString() + fileExtension;
 
-        Path targetLocation = uploadPath.resolve(fileName);
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        // สร้างชื่อไฟล์ที่ไม่ซ้ำ
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
 
-        return fileName;
-    }
+        // บันทึกไฟล์
+        Files.copy(file.getInputStream(), filePath);
 
-    public Path getFilePath(String fileName) {
-        return Paths.get(uploadDir).toAbsolutePath().normalize().resolve(fileName);
+        return fileName; // หรือคืน full path ถ้าต้องการ
     }
 }
