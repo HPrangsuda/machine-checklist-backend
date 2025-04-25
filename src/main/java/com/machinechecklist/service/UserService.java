@@ -24,15 +24,22 @@ public class UserService {
     }
 
     @PostConstruct
-    public void defaultUser(){
-        if(!userRepo.existsByUsername("admin")){
-            User user = new User();
-            user.setUsername("admin");
-            user.setFirstName("administrator");
-            user.setRole(RoleType.ADMIN);
-            user.setPassword(passwordEncoder.encode("admin"));
-            user.setCreateDate(new Timestamp(System.currentTimeMillis()));
-            userRepo.save(user);
+    public void defaultUser() {
+        try {
+            if (!userRepo.existsByUsername("admin")) {
+                User user = new User();
+                user.setUsername("admin");
+                user.setFirstName("administrator");
+                user.setRole(RoleType.ADMIN);
+                user.setPassword(passwordEncoder.encode("admin"));
+                user.setCreateDate(new Timestamp(System.currentTimeMillis()));
+                userRepo.save(user);
+                System.out.println("Admin user created successfully");
+            } else {
+                System.out.println("Admin user already exists");
+            }
+        } catch (Exception e) {
+            System.err.println("Error creating admin user: " + e.getMessage());
         }
     }
 

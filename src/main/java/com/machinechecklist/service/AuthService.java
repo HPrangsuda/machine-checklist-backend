@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -76,6 +77,13 @@ public class AuthService {
             logger.error(e.getMessage());
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public static void main(String[] args) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String rawPassword = "admin";
+        String encodedPassword = encoder.encode(rawPassword);
+        System.out.println("Encoded password for 'admin': " + encodedPassword);
     }
 
     private void setAccessTokenCookie(String accessToken, HttpServletResponse response) {
