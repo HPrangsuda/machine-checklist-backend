@@ -1,5 +1,6 @@
 package com.machinechecklist.controller;
 
+import com.machinechecklist.model.ChecklistRecords;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.service.FileStorageService;
 import com.machinechecklist.service.MachineService;
@@ -66,42 +67,11 @@ public class MachineController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Machine> createMachine(
-            @RequestPart("machine") Machine machine,
-            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
-        try {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String imagePath = fileStorageService.storeFile(imageFile);
-                machine.setImage(imagePath);
-            }
-
-            Machine savedMachine = machineService.createMachine(machine);
-            return ResponseEntity.ok(savedMachine);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    @PostMapping("/create")
+    public ResponseEntity<Machine> createMachine(@RequestBody Machine machine) {
+        Machine savedMachine = machineService.createMachine(machine);
+        return ResponseEntity.ok(savedMachine);
     }
-
-//    @GetMapping("/image/{fileName}")
-//    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
-//        try {
-//            Path filePath = fileStorageService.getFilePath(fileName);
-//            UrlResource resource = new UrlResource(filePath.toUri());
-//
-//            if (resource.exists()) {
-//                return ResponseEntity.ok()
-//                        .contentType(MediaType.IMAGE_JPEG) // Adjust based on file type
-//                        .body((Resource) resource);
-//            } else {
-//                return ResponseEntity.notFound().build();
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine machine) {
