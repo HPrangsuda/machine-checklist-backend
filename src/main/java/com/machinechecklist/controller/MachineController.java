@@ -68,12 +68,18 @@ public class MachineController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Machine> createMachine(@RequestBody Machine machine) {
-        Machine savedMachine = machineService.createMachine(machine);
-        return ResponseEntity.ok(savedMachine);
+    public ResponseEntity<?> createMachine(
+            @RequestParam("machineData") String machineData,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        try {
+            Machine savedMachine = machineService.createMachine(machineData, image);
+            return ResponseEntity.ok(savedMachine);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine machine) {
         try {
             Machine updatedMachine = machineService.updateMachine(id, machine);
