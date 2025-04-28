@@ -13,6 +13,15 @@ import java.util.List;
 public class MachineChecklistService {
     private final MachineChecklistRepo checklistRepo;
 
+    private MachineChecklistResetService resetService;
+
+    public MachineChecklist save(MachineChecklist checklist) {
+        MachineChecklist savedChecklist = checklistRepo.save(checklist);
+        // Schedule or update the reset task after saving
+        resetService.updateChecklistSchedule(savedChecklist);
+        return savedChecklist;
+    }
+
     public List<MachineChecklist> getChecklistByMachineCodeAndStatus(String machineCode, String checkStatus) {
         return checklistRepo.findByMachineCodeAndCheckStatus(machineCode, checkStatus);
     }

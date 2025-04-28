@@ -1,6 +1,5 @@
 package com.machinechecklist.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -8,10 +7,14 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.repo.MachineRepo;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -19,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -28,8 +32,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MachineService {
     private final MachineRepo machineRepo;
-    private final ObjectMapper objectMapper;
-    private final String uploadDir = "uploads/machine/";
+    @Value("${file.upload.directory:/uploads/machines}") // ตั้งค่าใน application.properties หรือใช้ค่าเริ่มต้น
+    private String uploadDirectory;
 
     public List<Machine> getAllMachines() {
         return machineRepo.findAll();
@@ -72,44 +76,40 @@ public class MachineService {
         return machineRepo.findByMachineCode(machineCode).orElse(null);
     }
 
-    public Machine createMachine(String machineData, MultipartFile image) throws IOException {
-        // Parse machineData JSON into Machine object
-        Machine machine;
-        try {
-            machine = objectMapper.readValue(machineData, Machine.class);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Invalid machine data format", e);
-        }
-
-        // Validate input
+    public Machine createMachine(Machine machine, MultipartFile file) {
         if (machine.getMachineCode() == null || machine.getMachineCode().isEmpty()) {
             throw new IllegalArgumentException("Machine code is required");
         }
 
-        // Check for duplicate
         if (machineRepo.existsByMachineCode(machine.getMachineCode())) {
             throw new IllegalStateException("Machine code already exists");
         }
 
-        // Handle image upload if provided
-        if (image != null && !image.isEmpty()) {
-            String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-            Files.write(filePath, image.getBytes());
-            machine.setImage(filePath.toString());
-        }
-
-        // Set check status
         machine.setCheckStatus("false");
 
-        // Set QR code
         String qrCodeJson = String.format("{\"status\": true, \"code\": \"%s\"}",
                 machine.getMachineCode());
         machine.setQrCode(qrCodeJson);
 
-        // Save and return
+        if (file != null && !file.isEmpty()) {
+            try {
+                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                if (fileName.contains("..")) {
+                    throw new IllegalArgumentException("ชื่อไฟล์ไม่ถูกต้อง: " + fileName);
+                }
+
+                byte[] imageBytes = file.getBytes();
+                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                machine.setImage("data:" + file.getContentType() + ";base64," + base64Image);
+
+            } catch (IOException e) {
+                throw new RuntimeException("ไม่สามารถประมวลผลไฟล์รูปภาพได้", e);
+            }
+        }
+
         return machineRepo.save(machine);
     }
+
     @Setter
     @Getter
     public static class MachineResponse {
@@ -147,6 +147,19 @@ public class MachineService {
             machineRepo.deleteById(id);
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
+        }
+    }
+
+    public class FileStorageException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+
+        public FileStorageException(String message) {
+            super(message);
+        }
+
+        public FileStorageException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 }

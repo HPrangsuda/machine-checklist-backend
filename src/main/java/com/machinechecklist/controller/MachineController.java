@@ -1,5 +1,6 @@
 package com.machinechecklist.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.machinechecklist.model.ChecklistRecords;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.service.FileStorageService;
@@ -23,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MachineController {
     private final MachineService machineService;
+    private ObjectMapper objectMapper;
     private final FileStorageService fileStorageService;
 
     @GetMapping
@@ -68,15 +70,12 @@ public class MachineController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createMachine(
-            @RequestParam("machineData") String machineData,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        try {
-            Machine savedMachine = machineService.createMachine(machineData, image);
-            return ResponseEntity.ok(savedMachine);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+    public ResponseEntity<Machine> createMachine(
+            @RequestPart("machine") Machine machine,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        Machine savedMachine = machineService.createMachine(machine, file);
+        return ResponseEntity.ok(savedMachine);
     }
 
     @PutMapping("/update/{id}")
