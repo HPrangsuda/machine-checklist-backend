@@ -59,10 +59,10 @@ public class UserService {
         }
 
         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
-
+        System.out.println(user.getPassword());
         // เข้ารหัสรหัสผ่านด้วย passwordEncoder
         try {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode("111111"));
         } catch (Exception e) {
             throw new RuntimeException("Error encoding password: " + e.getMessage());
         }
