@@ -27,23 +27,16 @@ public class User {
     private String nickName;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "character varying(255)")
     private RoleType role;
 
     @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
-    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
     private Timestamp createDate;
-
-    public void setPassword(String password) {
-        if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("password cannot be null or empty");
-        }
-        this.password = password;
-    }
 
 }
