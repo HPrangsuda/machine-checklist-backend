@@ -31,7 +31,7 @@ public class UserService {
                 user.setUsername("admin");
                 user.setFirstName("administrator");
                 user.setRole(RoleType.ADMIN);
-                user.setRawPassword(passwordEncoder.encode("admin"));
+                user.setPassword(passwordEncoder.encode("admin"));
                 user.setCreateDate(new Timestamp(System.currentTimeMillis()));
                 userRepo.save(user);
                 System.out.println("Admin user created successfully");
@@ -53,16 +53,16 @@ public class UserService {
             throw new RuntimeException("User with username already exists.");
         }
 
-        // ตรวจสอบว่า rawPassword ไม่เป็น null
-        if (user.getRawPassword() == null || user.getRawPassword().trim().isEmpty()) {
-            throw new RuntimeException("rawPassword cannot be null");
+        // ตรวจสอบว่า Password ไม่เป็น null
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password cannot be null");
         }
 
         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
 
         // เข้ารหัสรหัสผ่านด้วย passwordEncoder
         try {
-            user.setRawPassword(passwordEncoder.encode(user.getRawPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         } catch (Exception e) {
             throw new RuntimeException("Error encoding password: " + e.getMessage());
         }
@@ -83,7 +83,7 @@ public class UserService {
             user.setStatus(updatedUser.getStatus());
             user.setDepartment(updatedUser.getDepartment());
             user.setRole(updatedUser.getRole());
-            user.setRawPassword(updatedUser.getRawPassword());
+            user.setPassword(updatedUser.getPassword());
             return userRepo.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }

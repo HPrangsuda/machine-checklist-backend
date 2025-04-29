@@ -34,16 +34,16 @@ public class User {
 
     @Column(nullable = false)
     @JsonIgnore
-    private String rawPassword;
+    private String password;
 
     @Column(nullable = false)
     private Timestamp createDate;
 
-    public void setRawPassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.trim().isEmpty()) {
-            throw new IllegalArgumentException("rawPassword cannot be null or empty");
+    public void setPassword(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("password cannot be null or empty");
         }
-        this.rawPassword = rawPassword;
+        this.password = password;
     }
 
 }
