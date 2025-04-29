@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,26 +49,30 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        // ตรวจสอบว่า username มีอยู่แล้วหรือไม่
         if (userRepo.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("User with username already exists.");
+            throw new IllegalArgumentException("username already exists");
         }
-
-        // ตรวจสอบว่า Password ไม่เป็น null
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            throw new RuntimeException("Password cannot be null");
+            throw new IllegalArgumentException("password cannot be null or empty");
         }
-
-        user.setCreateDate(new Timestamp(System.currentTimeMillis()));
-        System.out.println(user.getPassword());
-        // เข้ารหัสรหัสผ่านด้วย passwordEncoder
-        try {
-            user.setPassword(passwordEncoder.encode("111111"));
-        } catch (Exception e) {
-            throw new RuntimeException("Error encoding password: " + e.getMessage());
-        }
-
+        user.setCreateDate(Timestamp.from(Instant.now()));
         return userRepo.save(user);
+//        // ตรวจสอบว่า username มีอยู่แล้วหรือไม่
+//        if (userRepo.existsByUsername(user.getUsername())) {
+//            throw new RuntimeException("User with username already exists.");
+//        }
+//
+//
+//        user.setCreateDate(new Timestamp(System.currentTimeMillis()));
+//        System.out.println(user.getPassword());
+//        // เข้ารหัสรหัสผ่านด้วย passwordEncoder
+//        try {
+//            user.setPassword(passwordEncoder.encode("111111"));
+//        } catch (Exception e) {
+//            throw new RuntimeException("Error encoding password: " + e.getMessage());
+//        }
+//
+//        return userRepo.save(user);
     }
 
     public boolean checkIfUsernameExists(String username) {
