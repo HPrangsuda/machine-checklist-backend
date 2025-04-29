@@ -47,17 +47,31 @@ public class UserService {
         return userRepo.findById(id);
     }
 
-    public boolean checkIfUsernameExists(String username) {
-        return userRepo.existsByUsername(username);
-    }
-
     public User createUser(User user) {
+        // ตรวจสอบว่า username มีอยู่แล้วหรือไม่
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new RuntimeException("User with username already exists.");
         }
+
+        // ตรวจสอบว่า rawPassword ไม่เป็น null
+        if (user.getRawPassword() == null || user.getRawPassword().trim().isEmpty()) {
+            throw new RuntimeException("rawPassword cannot be null");
+        }
+
         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
-        user.setRawPassword(passwordEncoder.encode(user.getRawPassword()));
+
+        // เข้ารหัสรหัสผ่านด้วย passwordEncoder
+        try {
+            user.setRawPassword(passwordEncoder.encode(user.getRawPassword()));
+        } catch (Exception e) {
+            throw new RuntimeException("Error encoding password: " + e.getMessage());
+        }
+
         return userRepo.save(user);
+    }
+
+    public boolean checkIfUsernameExists(String username) {
+        return userRepo.existsByUsername(username);
     }
 
     public User updateUser(Long id, User updatedUser) {

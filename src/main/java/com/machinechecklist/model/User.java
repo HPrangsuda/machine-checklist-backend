@@ -38,4 +38,12 @@ public class User {
 
     @Column(nullable = false)
     private Timestamp createDate;
+
+    public void setRawPassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("rawPassword cannot be null or empty");
+        }
+        this.rawPassword = rawPassword;
+    }
+
 }
