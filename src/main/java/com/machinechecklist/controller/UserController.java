@@ -28,6 +28,12 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
+        boolean exists = userService.checkIfUsernameExists(username);
+        return ResponseEntity.ok(exists);
+    }
+
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {

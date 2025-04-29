@@ -31,7 +31,7 @@ public class UserService {
                 user.setUsername("admin");
                 user.setFirstName("administrator");
                 user.setRole(RoleType.ADMIN);
-                user.setPassword(passwordEncoder.encode("admin"));
+                user.setRawPassword(passwordEncoder.encode("admin"));
                 user.setCreateDate(new Timestamp(System.currentTimeMillis()));
                 userRepo.save(user);
                 System.out.println("Admin user created successfully");
@@ -47,11 +47,16 @@ public class UserService {
         return userRepo.findById(id);
     }
 
+    public boolean checkIfUsernameExists(String username) {
+        return userRepo.existsByUsername(username);
+    }
+
     public User createUser(User user) {
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new RuntimeException("User with username already exists.");
         }
         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        user.setRawPassword(passwordEncoder.encode(user.getRawPassword()));
         return userRepo.save(user);
     }
 
@@ -64,7 +69,7 @@ public class UserService {
             user.setStatus(updatedUser.getStatus());
             user.setDepartment(updatedUser.getDepartment());
             user.setRole(updatedUser.getRole());
-            user.setPassword(updatedUser.getPassword());
+            user.setRawPassword(updatedUser.getRawPassword());
             return userRepo.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }

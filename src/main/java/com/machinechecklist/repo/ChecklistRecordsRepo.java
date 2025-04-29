@@ -3,6 +3,7 @@ package com.machinechecklist.repo;
 import com.machinechecklist.model.ChecklistRecords;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +13,8 @@ import java.util.Optional;
 public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Long> {
     Optional<ChecklistRecords> findById(Long id);
 
-    List<ChecklistRecords> findByUserId(String personId);
+    @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON m.machineCode = cr.machineCode WHERE cr.userId = :personId")
+    List<ChecklistRecords> findByUserId(@Param("personId") String personId);
 
     @Query("SELECT c FROM ChecklistRecords c WHERE " +
             "c.recheck = true AND " +

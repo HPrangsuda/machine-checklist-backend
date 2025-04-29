@@ -34,7 +34,7 @@ public class User {
 
     @Column(nullable = false)
     @JsonIgnore
-    private String password;
+    private String rawPassword;
 
     @Column(nullable = false)
     private Timestamp createDate;
