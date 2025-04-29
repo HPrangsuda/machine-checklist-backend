@@ -49,6 +49,7 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        System.out.println(user.getPassword());
         if (userRepo.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("username already exists");
         }
