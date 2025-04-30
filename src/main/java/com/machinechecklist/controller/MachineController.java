@@ -72,7 +72,7 @@ public class MachineController {
     @PostMapping("/create")
     public ResponseEntity<Machine> createMachine(
             @RequestPart("machine") Machine machine,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
 
         Machine savedMachine = machineService.createMachine(machine, file);
         return ResponseEntity.ok(savedMachine);

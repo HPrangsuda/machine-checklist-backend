@@ -5,6 +5,7 @@ import com.machinechecklist.service.ChecklistRecordsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +41,10 @@ public class ChecklistRecordsController {
     }
 
     @PostMapping
-    public ResponseEntity<ChecklistRecords> createChecklistRecord(@RequestBody ChecklistRequestDTO request) {
-        ChecklistRecords savedRecord = checklistRecordsService.saveChecklistRecord(request);
+    public ResponseEntity<ChecklistRecords> createChecklistRecord(
+            @RequestPart("request") ChecklistRequestDTO request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        ChecklistRecords savedRecord = checklistRecordsService.saveChecklistRecord(request, file);
         return ResponseEntity.ok(savedRecord);
     }
 

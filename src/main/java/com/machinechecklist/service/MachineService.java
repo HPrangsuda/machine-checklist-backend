@@ -7,33 +7,23 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.repo.MachineRepo;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class MachineService {
+
+    private final FileStorageService fileStorageService;
     private final MachineRepo machineRepo;
-    @Value("${file.upload.directory:/uploads/machines}") // ตั้งค่าใน application.properties หรือใช้ค่าเริ่มต้น
-    private String uploadDirectory;
 
     public List<Machine> getAllMachines() {
         return machineRepo.findAll();
@@ -76,7 +66,7 @@ public class MachineService {
         return machineRepo.findByMachineCode(machineCode).orElse(null);
     }
 
-    public Machine createMachine(Machine machine, MultipartFile file) {
+    public Machine createMachine(Machine machine, MultipartFile file) throws IOException {
         if (machine.getMachineCode() == null || machine.getMachineCode().isEmpty()) {
             throw new IllegalArgumentException("Machine code is required");
         }
@@ -91,20 +81,9 @@ public class MachineService {
                 machine.getMachineCode());
         machine.setQrCode(qrCodeJson);
 
-        if (file != null && !file.isEmpty()) {
-            try {
-                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-                if (fileName.contains("..")) {
-                    throw new IllegalArgumentException("ชื่อไฟล์ไม่ถูกต้อง: " + fileName);
-                }
-
-                byte[] imageBytes = file.getBytes();
-                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-                machine.setImage("data:" + file.getContentType() + ";base64," + base64Image);
-
-            } catch (IOException e) {
-                throw new RuntimeException("ไม่สามารถประมวลผลไฟล์รูปภาพได้", e);
-            }
+        if (file != null) {
+            String filename = fileStorageService.storeFile(file);
+            machine.setImage(filename);
         }
 
         return machineRepo.save(machine);
@@ -147,19 +126,6 @@ public class MachineService {
             machineRepo.deleteById(id);
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
-        }
-    }
-
-    public class FileStorageException extends RuntimeException {
-
-        private static final long serialVersionUID = 1L;
-
-        public FileStorageException(String message) {
-            super(message);
-        }
-
-        public FileStorageException(String message, Throwable cause) {
-            super(message, cause);
         }
     }
 }

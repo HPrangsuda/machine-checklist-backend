@@ -32,7 +32,7 @@ public class UserService {
                 user.setUsername("admin");
                 user.setFirstName("administrator");
                 user.setRole(RoleType.ADMIN);
-                user.setPassword(passwordEncoder.encode("admin"));
+                user.setPassword(passwordEncoder.encode("12345678"));
                 user.setCreateDate(new Timestamp(System.currentTimeMillis()));
                 userRepo.save(user);
                 System.out.println("Admin user created successfully");
@@ -55,7 +55,7 @@ public class UserService {
         }
 
         user.setCreateDate(new Timestamp(System.currentTimeMillis()));
-        System.out.println(user.getPassword());
+
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         } catch (Exception e) {
@@ -78,7 +78,7 @@ public class UserService {
             user.setStatus(updatedUser.getStatus());
             user.setDepartment(updatedUser.getDepartment());
             user.setRole(updatedUser.getRole());
-            user.setPassword(updatedUser.getPassword());
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return userRepo.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }

@@ -8,25 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ChecklistRecordsService {
 
+    private final FileStorageService fileStorageService;
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
     private final ObjectMapper objectMapper;
-
-    private static final String UPLOAD_DIR = "uploads/";
 
     public List<ChecklistRecords> getAllRecords() {
         return checklistRecordsRepo.findAll();
@@ -44,7 +40,7 @@ public class ChecklistRecordsService {
         return checklistRecordsRepo.findByManagerOrSupervisor(personId);
     }
 
-    public ChecklistRecords saveChecklistRecord(ChecklistRequestDTO request) {
+    public ChecklistRecords saveChecklistRecord(ChecklistRequestDTO request, MultipartFile file) {
         try {
             ChecklistRecords record = new ChecklistRecords();
             record.setMachineCode(request.getMachineCode());
@@ -71,40 +67,22 @@ public class ChecklistRecordsService {
                 record.setRecheck(false);
             }
 
-            // บันทึก ChecklistRecords
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
 
-            // ค้นหาและอัปเดต Machine
             Machine machine = machineRepo.findByMachineCode(request.getMachineCode())
                     .orElseThrow(() -> new RuntimeException("Machine not found with code: " + request.getMachineCode()));
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machine.setCheckStatus(savedRecord.getChecklistStatus());
-            machineRepo.save(machine);
 
+            if (file != null) {
+                String fileName = fileStorageService.storeFile(file);
+                machine.setImage(fileName);
+            }
+            machineRepo.save(machine);
             return savedRecord;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save checklist record: " + e.getMessage());
-        }
-    }
-
-    public String uploadFile(MultipartFile file) {
-        try {
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            String fileExtension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf('.')) : "";
-            String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-
-            File destination = new File(UPLOAD_DIR + uniqueFileName);
-            file.transferTo(destination);
-
-            return uniqueFileName;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file: " + e.getMessage());
         }
     }
 
