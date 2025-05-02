@@ -64,8 +64,7 @@ public class AuthService {
                 response.put("accessToken", token);
                 response.put("refreshToken", refreshToken);
                 response.put("username", loginRequest.getUsername());
-                response.put("firstName", getUSer.getFirstName());
-                response.put("lastName", getUSer.getLastName());
+                response.put("fullName", getUSer.getFirstName()+" "+getUSer.getLastName() );
             }else{
                 response.put("msg", "User authentication failed");
                 response.put("code", 1302);
