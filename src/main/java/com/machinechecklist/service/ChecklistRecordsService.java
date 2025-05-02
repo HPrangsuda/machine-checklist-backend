@@ -4,7 +4,11 @@ import com.machinechecklist.model.*;
 import com.machinechecklist.repo.ChecklistRecordsRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.machinechecklist.repo.MachineRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +28,29 @@ public class ChecklistRecordsService {
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
     private final ObjectMapper objectMapper;
+    private final Logger logger = LoggerFactory.getLogger(ChecklistRecordsService.class);
+
+    @Scheduled(cron = "0 * * * * *", zone = "Asia/Bangkok")
+    @Transactional
+    public void updateOverdueChecklists() {
+        logger.info("Starting overdue checklist update task...");
+        List<ChecklistRecords> pendingRecords = checklistRecordsRepo.findByChecklistStatusIn(
+                List.of("รอหัวหน้างานตรวจสอบ", "รอผู้จัดการฝ่ายตรวจสอบ")
+        );
+        logger.info("Found {} pending records to update", pendingRecords.size());
+
+        for (ChecklistRecords record : pendingRecords) {
+            record.setChecklistStatus("เกินกำหนด");
+            checklistRecordsRepo.save(record);
+
+            Machine machine = machineRepo.findByMachineCode(record.getMachineCode())
+                    .orElseThrow(() -> new RuntimeException("Machine not found with code: " + record.getMachineCode()));
+            machine.setCheckStatus("เกินกำหนด");
+            machineRepo.save(machine);
+        }
+
+        logger.info("Completed overdue checklist update task.");
+    }
 
     public List<ChecklistRecords> getAllRecords() {
         return checklistRecordsRepo.findAll();

@@ -21,4 +21,5 @@ public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Lo
             "((c.checklistStatus = 'รอหัวหน้างานตรวจสอบ' AND c.supervisor = :personId) OR " +
             "(c.checklistStatus = 'รอผู้จัดการฝ่ายตรวจสอบ' AND c.manager = :personId))")
     List<ChecklistRecords> findByManagerOrSupervisor(String personId);
+    List<ChecklistRecords> findByChecklistStatusIn(List<String> statuses);
 }
