@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.UUID;
 
 @Service
@@ -29,13 +28,10 @@ public class FileStorageService {
         }
         String newFilename = UUID.randomUUID().toString() + fileExtension;
 
-        // Encode filename to Base64
-        String base64Filename = Base64.getEncoder().encodeToString(newFilename.getBytes());
-
-        // Save file to upload directory using Base64 filename
-        Path destinationPath = Paths.get(FileStorageConfig.getUploadDir()).resolve(base64Filename);
+        // Save file to upload directory
+        Path destinationPath = Paths.get(FileStorageConfig.getUploadDir()).resolve(newFilename);
         Files.copy(file.getInputStream(), destinationPath);
 
-        return base64Filename;
+        return newFilename;
     }
 }
