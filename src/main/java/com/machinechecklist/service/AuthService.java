@@ -125,7 +125,7 @@ public class AuthService {
         String lName = (lastName != null) ? lastName : "";
 
         String fullName = fName+" "+lName;
-        String encodedFullName = java.net.URLEncoder.encode(fullName, StandardCharsets.UTF_8).replace("+", " ");
+        String encodedFullName = java.net.URLEncoder.encode(fullName, StandardCharsets.UTF_8);
 
         Cookie cookie = new Cookie("fullname", encodedFullName);
         cookie.setHttpOnly(false);
