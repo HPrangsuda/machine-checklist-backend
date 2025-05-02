@@ -51,7 +51,12 @@ public class ChecklistRecordsService {
             record.setMachineChecklist(checklistJson);
 
             record.setMachineNote(request.getNote());
-            record.setMachineImage(request.getMachineImage());
+
+            if (file != null) {
+                String fileName = fileStorageService.storeFile(file);
+                record.setMachineImage(fileName);
+            }
+
             record.setUserId(request.getUserId());
             record.setUserName(request.getUserName());
             record.setSupervisor(request.getSupervisor());
@@ -74,12 +79,8 @@ public class ChecklistRecordsService {
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machine.setCheckStatus(savedRecord.getChecklistStatus());
-
-            if (file != null) {
-                String fileName = fileStorageService.storeFile(file);
-                machine.setImage(fileName);
-            }
             machineRepo.save(machine);
+
             return savedRecord;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save checklist record: " + e.getMessage());
