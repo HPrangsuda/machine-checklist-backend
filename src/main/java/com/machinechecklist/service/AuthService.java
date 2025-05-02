@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,7 +61,11 @@ public class AuthService {
                 setAccessTokenCookie(token, httpResponse);
                 setAccessRefreshCookie(refreshToken, httpResponse);
                 setUsername(getUSer.getUsername(), httpResponse);
-                setFullName(getUSer.getFirstName(), getUSer.getLastName(), httpResponse);
+
+                String firstName = getUSer.getFirstName() != null ? getUSer.getFirstName() : "";
+                String lastName = getUSer.getLastName() != null ? getUSer.getLastName() : "";
+                setFullName(firstName, lastName, httpResponse);
+
                 response.put("code", 200);
                 response.put("accessToken", token);
                 response.put("refreshToken", refreshToken);
@@ -114,9 +119,14 @@ public class AuthService {
         response.addCookie(cookie);
     }
 
-    private void setFullName(String firstName, String lastName, HttpServletResponse response) {
-        String fullName = firstName + " " + lastName;
-        Cookie cookie = new Cookie("fullname", fullName);
+    private void setFullName(String firstName, String lastName, HttpServletResponse response) throws UnsupportedEncodingException {
+        String fName = (firstName != null) ? firstName : "";
+        String lName = (lastName != null) ? lastName : "";
+
+        String fullName = fName + " " + lName;
+        String encodedFullName = java.net.URLEncoder.encode(fullName, "UTF-8");
+
+        Cookie cookie = new Cookie("fullname", encodedFullName);
         cookie.setHttpOnly(false);
         cookie.setSecure(false);
         cookie.setPath("/");
