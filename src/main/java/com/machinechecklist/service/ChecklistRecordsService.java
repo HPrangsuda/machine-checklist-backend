@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -41,6 +42,10 @@ public class ChecklistRecordsService {
     }
 
     public ChecklistRecords saveChecklistRecord(ChecklistRequestDTO request, MultipartFile file) {
+        Machine machine = machineRepo.findByMachineCode(request.getMachineCode())
+                .orElseThrow(() -> new RuntimeException("Machine not found with code: " + request.getMachineCode()));
+        String responsibleId = machine.getResponsiblePersonId();
+
         try {
             ChecklistRecords record = new ChecklistRecords();
             record.setMachineCode(request.getMachineCode());
@@ -64,7 +69,7 @@ public class ChecklistRecordsService {
             record.setDateCreated(new Date());
 
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Bangkok"));
-            if (today.getDayOfWeek() == DayOfWeek.FRIDAY) {
+            if (today.getDayOfWeek() == DayOfWeek.FRIDAY && Objects.equals(responsibleId, record.getUserId())) {
                 record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
                 record.setRecheck(true);
             } else {
@@ -73,9 +78,6 @@ public class ChecklistRecordsService {
             }
 
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
-
-            Machine machine = machineRepo.findByMachineCode(request.getMachineCode())
-                    .orElseThrow(() -> new RuntimeException("Machine not found with code: " + request.getMachineCode()));
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machine.setCheckStatus(savedRecord.getChecklistStatus());
