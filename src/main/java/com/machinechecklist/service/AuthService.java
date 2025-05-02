@@ -60,7 +60,7 @@ public class AuthService {
                 setAccessTokenCookie(token, httpResponse);
                 setAccessRefreshCookie(refreshToken, httpResponse);
                 setUsername(getUSer.getUsername(), httpResponse);
-                setFullName(getUSer.getFirstName()+" "+getUSer.getLastName(), httpResponse);
+                setFullName(getUSer.getFirstName(), getUSer.getLastName(), httpResponse);
                 response.put("code", 200);
                 response.put("accessToken", token);
                 response.put("refreshToken", refreshToken);
@@ -88,8 +88,8 @@ public class AuthService {
 
     private void setAccessTokenCookie(String accessToken, HttpServletResponse response) {
         Cookie cookie = new Cookie("authorise", accessToken);
-        cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setValue(accessToken);
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
@@ -98,8 +98,8 @@ public class AuthService {
 
     private void setAccessRefreshCookie(String sessionId, HttpServletResponse response) {
         Cookie cookie = new Cookie("sessionId", sessionId);
-        cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
         response.addCookie(cookie);
@@ -107,17 +107,18 @@ public class AuthService {
 
     private void setUsername(String username, HttpServletResponse response) {
         Cookie cookie = new Cookie("username", username);
-        cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
         response.addCookie(cookie);
     }
 
-    private void setFullName(String fullName, HttpServletResponse response) {
-        Cookie cookie = new Cookie("fullName", fullName);
-        cookie.setHttpOnly(false); // ควรพิจารณาใช้ true เพื่อความปลอดภัย
-        cookie.setSecure(false); // ใช้กับ HTTPS เท่านั้น
+    private void setFullName(String firstName, String lastName, HttpServletResponse response) {
+        String fullName = firstName + " " + lastName;
+        Cookie cookie = new Cookie("fullname", fullName);
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
         response.addCookie(cookie);
