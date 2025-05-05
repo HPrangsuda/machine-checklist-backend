@@ -138,7 +138,7 @@ public class MachineService {
         // Set column widths (in 1/256th of a character width)
         sheet.setColumnWidth(0, 8000); // machineName
         sheet.setColumnWidth(1, 8000); // machineCode
-        sheet.setColumnWidth(2, 6000); // QR code image (increased to accommodate 200px QR code)
+        sheet.setColumnWidth(2, 6000); // QR code image
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -170,7 +170,7 @@ public class MachineService {
 
             // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
-                // Generate QR code image
+                // Generate QR code image (assuming machine.getQrCode() returns machineCode)
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
                 BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
                 ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
@@ -184,17 +184,17 @@ public class MachineService {
                 ClientAnchor anchor = helper.createClientAnchor();
                 anchor.setCol1(2);
                 anchor.setRow1(rowNum);
-                anchor.setDx1(0);
+                anchor.setDx1(Units.pixelToEMU(50)); // Offset to center in cell
                 anchor.setDy1(0);
                 // Set anchor to match QR code size (200px)
                 anchor.setCol2(2);
                 anchor.setRow2(rowNum + 1);
-                anchor.setDx2(Units.pixelToEMU(200)); // 200 pixels in EMU
-                anchor.setDy2(Units.pixelToEMU(200)); // 200 pixels in EMU
+                anchor.setDx2(Units.pixelToEMU(250)); // 200px + offset
+                anchor.setDy2(Units.pixelToEMU(200)); // 200px
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
                 // No resize to maintain 1:1 aspect ratio
 
-                // Adjust row height to accommodate QR code (200px converted to points)
+                // Adjust row height for QR code (200px converted to points)
                 row.setHeight((short) Units.pixelToPoints(200));
 
                 rowNum++; // Move to next row
