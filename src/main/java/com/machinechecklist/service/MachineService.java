@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,11 +51,7 @@ public class MachineService {
             if (machine.getQrCode() == null || machine.getQrCode().isEmpty()) {
                 throw new RuntimeException("QR code data is missing for machine id: " + id);
             }
-            String qrCodeBase64 = generateQRCode(
-                    machine.getQrCode(),
-                    machine.getMachineName() != null ? machine.getMachineName() : "",
-                    machine.getMachineCode() != null ? machine.getMachineCode() : ""
-            );
+            String qrCodeBase64 = generateQRCode(machine.getQrCode(), machine.getMachineName(), machine.getMachineCode());
             return new MachineResponse(machine, qrCodeBase64);
         }
         throw new RuntimeException("Machine not found with id: " + id);
@@ -62,48 +59,44 @@ public class MachineService {
 
     private String generateQRCode(String qrContent, String machineName, String machineCode) {
         try {
+            int qrSize = 200;
+            int textAreaHeight = 60;
+            int totalHeight = qrSize + textAreaHeight;
+
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 200, 200);
-            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+            BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, qrSize, qrSize);
 
-            // Create a new image with extra space for text
-            int qrWidth = qrImage.getWidth();
-            int qrHeight = qrImage.getHeight();
-            int textHeight = 60; // Space for two lines of text
-            int totalHeight = qrHeight + textHeight;
-            BufferedImage combinedImage = new BufferedImage(qrWidth, totalHeight, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = combinedImage.createGraphics();
+            BufferedImage combinedImage = new BufferedImage(qrSize, totalHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = combinedImage.createGraphics();
 
-            // Set background to white
-            g2d.setColor(java.awt.Color.WHITE);
-            g2d.fillRect(0, 0, qrWidth, totalHeight);
+            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Draw QR code at the top
-            g2d.drawImage(qrImage, 0, 0, null);
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(0, 0, qrSize, totalHeight);
 
-            // Set font and color for text
-            g2d.setColor(java.awt.Color.BLACK);
-            FontMetrics fm = g2d.getFontMetrics();
+            // Draw QR code
+            for (int x = 0; x < qrSize; x++) {
+                for (int y = 0; y < qrSize; y++) {
+                    if (bitMatrix.get(x, y)) {
+                        graphics.setColor(Color.BLACK);
+                        graphics.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
 
-            // Draw machineName centered
-            int nameY = qrHeight + 20; // Position below QR code
-            int nameWidth = fm.stringWidth(machineName);
-            int nameX = (qrWidth - nameWidth) / 2; // Center horizontally
-            g2d.drawString(machineName, nameX, nameY);
+            graphics.setColor(Color.BLACK);
 
-            // Draw machineCode centered
-            int codeY = nameY + 20; // Position below machineName
-            int codeWidth = fm.stringWidth(machineCode);
-            int codeX = (qrWidth - codeWidth) / 2; // Center horizontally
-            g2d.drawString(machineCode, codeX, codeY);
+            FontMetrics fontMetrics = graphics.getFontMetrics();
+            int machineCodeWidth = fontMetrics.stringWidth(machineCode);
 
-            // Clean up
-            g2d.dispose();
+            graphics.drawString(machineCode, (qrSize - machineCodeWidth) / 2, qrSize + 45);
 
-            // Convert to Base64
+            graphics.dispose();
+
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
             ImageIO.write(combinedImage, "PNG", pngOutputStream);
             return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
+
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Error generating QR code: " + e.getMessage());
         }
@@ -144,7 +137,7 @@ public class MachineService {
         // Set column widths
         sheet.setColumnWidth(0, 8000); // machineName
         sheet.setColumnWidth(1, 8000); // machineCode
-        sheet.setColumnWidth(2, 10000); // QR code image + text
+        sheet.setColumnWidth(2, 6000); // QR code image
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -174,7 +167,7 @@ public class MachineService {
             Cell codeCell = row.createCell(1);
             codeCell.setCellValue(machine.getMachineCode() != null ? machine.getMachineCode() : "");
 
-            // QR code image and text in the same cell
+            // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
                 // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -193,12 +186,12 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-                picture.resize(0.3);
+                picture.resize(0.3); // Scale to fit in cell
 
-                // Adjust row height to accommodate QR code image and text
-                row.setHeight((short) (250 * 20)); // 250 pixels for image + text
+                // Adjust row height to accommodate QR code image
+                row.setHeight((short) (150 * 20)); // Set height for QR code
 
-                rowNum++;
+                rowNum++; // Move to next row
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
