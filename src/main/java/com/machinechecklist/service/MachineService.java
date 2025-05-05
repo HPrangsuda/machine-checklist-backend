@@ -94,12 +94,12 @@ public class MachineService {
     public byte[] exportMachinesToExcel() throws IOException, WriterException {
         List<Machine> machines = machineRepo.findAll();
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Machines");
+        Sheet sheet = workbook.createSheet("Machine-QRCode");
 
         // Set column widths
-        sheet.setColumnWidth(0, 8000); // machineName
-        sheet.setColumnWidth(1, 8000); // machineCode
-        sheet.setColumnWidth(2, 6000); // QR code image
+        sheet.setColumnWidth(0, 8000);
+        sheet.setColumnWidth(1, 8000);
+        sheet.setColumnWidth(2, 6000);
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -116,20 +116,21 @@ public class MachineService {
             cell.setCellStyle(headerStyle);
         }
 
+        CellStyle qrCellStyle = workbook.createCellStyle();
+        qrCellStyle.setWrapText(true);
+        qrCellStyle.setVerticalAlignment(VerticalAlignment.TOP);
+
         // Data rows
         int rowNum = 1;
         for (Machine machine : machines) {
             Row row = sheet.createRow(rowNum);
 
-            // machineName
             Cell nameCell = row.createCell(0);
             nameCell.setCellValue(machine.getMachineName() != null ? machine.getMachineName() : "");
 
-            // machineCode
             Cell codeCell = row.createCell(1);
             codeCell.setCellValue(machine.getMachineCode() != null ? machine.getMachineCode() : "");
 
-            // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
                 // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -148,12 +149,17 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-                picture.resize(0.3); // Scale to fit in cell
+
+                Cell qrCell = row.createCell(2);
+                String cellText = (machine.getMachineName() != null ? machine.getMachineName() : "") + "\n" +
+                        (machine.getMachineCode() != null ? machine.getMachineCode() : "");
+                qrCell.setCellValue(cellText);
+                qrCell.setCellStyle(qrCellStyle);
 
                 // Adjust row height to accommodate QR code image
-                row.setHeight((short) (150 * 20)); // Set height for QR code
+                row.setHeight((short) (100 * 100));
 
-                rowNum++; // Move to next row
+                rowNum++;
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
@@ -162,12 +168,10 @@ public class MachineService {
             }
         }
 
-        // Auto-size columns (optional, as we set widths manually)
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
 
-        // Write to byte array
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         workbook.write(outputStream);
         workbook.close();
