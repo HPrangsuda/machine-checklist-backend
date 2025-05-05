@@ -99,7 +99,7 @@ public class MachineService {
         // Set column widths
         sheet.setColumnWidth(0, 8000); // machineName
         sheet.setColumnWidth(1, 8000); // machineCode
-        sheet.setColumnWidth(2, 10000); // QR code + details
+        sheet.setColumnWidth(2, 6000); // QR code image
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -129,7 +129,7 @@ public class MachineService {
             Cell codeCell = row.createCell(1);
             codeCell.setCellValue(machine.getMachineCode() != null ? machine.getMachineCode() : "");
 
-            // QR code image + details
+            // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
                 // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
@@ -148,29 +148,16 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-                picture.resize(0.5); // Scale to fit better
+                picture.resize(0.3); // Scale to fit in cell
 
-                // Add machineName and machineCode below QR code
-                Row detailRow1 = sheet.createRow(rowNum + 1);
-                Cell detailCell1 = detailRow1.createCell(2);
-                detailCell1.setCellValue("Name: " + (machine.getMachineName() != null ? machine.getMachineName() : ""));
+                // Adjust row height to accommodate QR code image
+                row.setHeight((short) (150 * 20)); // Set height for QR code
 
-                Row detailRow2 = sheet.createRow(rowNum + 2);
-                Cell detailCell2 = detailRow2.createCell(2);
-                detailCell2.setCellValue("Code: " + (machine.getMachineCode() != null ? machine.getMachineCode() : ""));
-
-                // Merge cells for QR code and details to align properly
-                sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum + 2, 2, 2));
-
-                // Adjust row heights
-                row.setHeight((short) (200 * 20)); // QR code row
-                detailRow1.setHeight((short) (20 * 20));
-                detailRow2.setHeight((short) (20 * 20));
-
-                rowNum += 3; // Move to next set of rows
+                rowNum++; // Move to next row
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
+                row.setHeight((short) (20 * 20)); // Default row height for text
                 rowNum++;
             }
         }
