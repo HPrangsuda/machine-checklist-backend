@@ -184,10 +184,11 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-                picture.resize(0.3); // Scale to fit in cell
+                // Remove scaling to maintain 1:1 aspect ratio
+                // picture.resize(0.3); // Removed to keep original size
 
                 // Adjust row height to accommodate QR code image
-                row.setHeight((short) (150 * 150)); // Set height for QR code
+                row.setHeight((short) (200 * 20)); // Set height based on QR code size (200px converted to points)
 
                 rowNum++; // Move to next row
             } else {
