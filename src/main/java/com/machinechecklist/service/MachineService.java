@@ -170,11 +170,36 @@ public class MachineService {
 
             // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
-                // Generate QR code image (assuming machine.getQrCode() returns machineCode)
+                // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
                 BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
+                BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+                // Overlay machineCode text on QR code
+                String machineCode = machine.getMachineCode() != null ? machine.getMachineCode() : "";
+                Graphics2D g2d = qrImage.createGraphics();
+                g2d.setColor(Color.BLACK);
+                int textWidth = g2d.getFontMetrics().stringWidth(machineCode);
+                int textHeight = g2d.getFontMetrics().getHeight();
+
+                // Define bottom region (bottom 20% of image, e.g., 40px for 200px height)
+                int bottomRegionHeight = 40;
+                int bottomRegionY = qrImage.getHeight() - bottomRegionHeight;
+
+                // Center text horizontally and vertically in bottom region
+                int x = (qrImage.getWidth() - textWidth) / 2;
+                int y = bottomRegionY + (bottomRegionHeight + textHeight) / 2 - g2d.getFontMetrics().getDescent();
+
+                // Draw white background for text readability
+                g2d.setColor(Color.WHITE);
+                g2d.fillRect(x - 5, bottomRegionY, textWidth + 10, bottomRegionHeight);
+                g2d.setColor(Color.BLACK);
+                g2d.drawString(machineCode, x, y);
+                g2d.dispose();
+
+                // Convert modified image to byte array
                 ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-                MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+                ImageIO.write(qrImage, "PNG", pngOutputStream);
                 byte[] qrCodeBytes = pngOutputStream.toByteArray();
 
                 // Add picture to workbook
