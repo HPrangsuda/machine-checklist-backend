@@ -10,8 +10,10 @@ import com.machinechecklist.repo.MachineRepo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -87,6 +89,102 @@ public class MachineService {
         }
 
         return machineRepo.save(machine);
+    }
+
+    public byte[] exportMachinesToExcel() throws IOException, WriterException {
+        List<Machine> machines = machineRepo.findAll();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Machines");
+
+        // Set column widths
+        sheet.setColumnWidth(0, 8000); // machineName
+        sheet.setColumnWidth(1, 8000); // machineCode
+        sheet.setColumnWidth(2, 10000); // QR code + details
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {"Machine Name", "Machine Code", "QR Code"};
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Data rows
+        int rowNum = 1;
+        for (Machine machine : machines) {
+            Row row = sheet.createRow(rowNum);
+
+            // machineName
+            Cell nameCell = row.createCell(0);
+            nameCell.setCellValue(machine.getMachineName() != null ? machine.getMachineName() : "");
+
+            // machineCode
+            Cell codeCell = row.createCell(1);
+            codeCell.setCellValue(machine.getMachineCode() != null ? machine.getMachineCode() : "");
+
+            // QR code image + details
+            if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
+                // Generate QR code image
+                QRCodeWriter qrCodeWriter = new QRCodeWriter();
+                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
+                ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+                MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+                byte[] qrCodeBytes = pngOutputStream.toByteArray();
+
+                // Add picture to workbook
+                int pictureIdx = workbook.addPicture(qrCodeBytes, Workbook.PICTURE_TYPE_PNG);
+                CreationHelper helper = workbook.getCreationHelper();
+                Drawing<?> drawing = sheet.createDrawingPatriarch();
+                ClientAnchor anchor = helper.createClientAnchor();
+                anchor.setCol1(2);
+                anchor.setRow1(rowNum);
+                anchor.setDx1(0);
+                anchor.setDy1(0);
+                Picture picture = drawing.createPicture(anchor, pictureIdx);
+                picture.resize(0.5); // Scale to fit better
+
+                // Add machineName and machineCode below QR code
+                Row detailRow1 = sheet.createRow(rowNum + 1);
+                Cell detailCell1 = detailRow1.createCell(2);
+                detailCell1.setCellValue("Name: " + (machine.getMachineName() != null ? machine.getMachineName() : ""));
+
+                Row detailRow2 = sheet.createRow(rowNum + 2);
+                Cell detailCell2 = detailRow2.createCell(2);
+                detailCell2.setCellValue("Code: " + (machine.getMachineCode() != null ? machine.getMachineCode() : ""));
+
+                // Merge cells for QR code and details to align properly
+                sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum + 2, 2, 2));
+
+                // Adjust row heights
+                row.setHeight((short) (200 * 20)); // QR code row
+                detailRow1.setHeight((short) (20 * 20));
+                detailRow2.setHeight((short) (20 * 20));
+
+                rowNum += 3; // Move to next set of rows
+            } else {
+                Cell qrCell = row.createCell(2);
+                qrCell.setCellValue("No QR Code");
+                rowNum++;
+            }
+        }
+
+        // Auto-size columns (optional, as we set widths manually)
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write to byte array
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        return outputStream.toByteArray();
     }
 
     @Setter
