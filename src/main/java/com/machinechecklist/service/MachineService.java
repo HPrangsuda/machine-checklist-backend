@@ -153,7 +153,7 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-
+                picture.resize(0.3);
                 // Add machineName and machineCode as text in the same cell
                 Cell qrCell = row.createCell(2);
                 String cellText = (machine.getMachineName() != null ? machine.getMachineName() : "") + "\n" +
