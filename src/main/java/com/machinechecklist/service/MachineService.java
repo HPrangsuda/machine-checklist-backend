@@ -137,14 +137,16 @@ public class MachineService {
         // Set column widths
         sheet.setColumnWidth(0, 8000); // machineName
         sheet.setColumnWidth(1, 8000); // machineCode
-        sheet.setColumnWidth(2, 6000); // QR code image
+        sheet.setColumnWidth(2, 10000); // QR code image with text
 
         // Create header row
         Row headerRow = sheet.createRow(0);
         String[] headers = {"Machine Name", "Machine Code", "QR Code"};
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
+        headerFont.setFontName("Noto Sans Thai");
         headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 14);
         headerStyle.setFont(headerFont);
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
 
@@ -169,12 +171,13 @@ public class MachineService {
 
             // QR code image
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
-                // Generate QR code image
-                QRCodeWriter qrCodeWriter = new QRCodeWriter();
-                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
-                ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-                MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
-                byte[] qrCodeBytes = pngOutputStream.toByteArray();
+                // Generate QR code image with embedded text
+                String qrCodeBase64 = generateQRCode(
+                        machine.getQrCode(),
+                        machine.getMachineName() != null ? machine.getMachineName() : "",
+                        machine.getMachineCode() != null ? machine.getMachineCode() : ""
+                );
+                byte[] qrCodeBytes = Base64.getDecoder().decode(qrCodeBase64);
 
                 // Add picture to workbook
                 int pictureIdx = workbook.addPicture(qrCodeBytes, Workbook.PICTURE_TYPE_PNG);
@@ -186,10 +189,9 @@ public class MachineService {
                 anchor.setDx1(0);
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
-                picture.resize(0.3); // Scale to fit in cell
 
-                // Adjust row height to accommodate QR code image
-                row.setHeight((short) (150 * 20)); // Set height for QR code
+                // Adjust row height to accommodate QR code image with text
+                row.setHeight((short) (260 * 20)); // 260 pixels for image + text
 
                 rowNum++; // Move to next row
             } else {
