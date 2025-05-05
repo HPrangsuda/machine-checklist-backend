@@ -11,14 +11,18 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,18 +50,59 @@ public class MachineService {
             if (machine.getQrCode() == null || machine.getQrCode().isEmpty()) {
                 throw new RuntimeException("QR code data is missing for machine id: " + id);
             }
-            String qrCodeBase64 = generateQRCode(machine.getQrCode());
+            String qrCodeBase64 = generateQRCode(
+                    machine.getQrCode(),
+                    machine.getMachineName() != null ? machine.getMachineName() : "",
+                    machine.getMachineCode() != null ? machine.getMachineCode() : ""
+            );
             return new MachineResponse(machine, qrCodeBase64);
         }
         throw new RuntimeException("Machine not found with id: " + id);
     }
 
-    private String generateQRCode(String qrContent) {
+    private String generateQRCode(String qrContent, String machineName, String machineCode) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 200, 200);
+            BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+            // Create a new image with extra space for text
+            int qrWidth = qrImage.getWidth();
+            int qrHeight = qrImage.getHeight();
+            int textHeight = 60; // Space for two lines of text
+            int totalHeight = qrHeight + textHeight;
+            BufferedImage combinedImage = new BufferedImage(qrWidth, totalHeight, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = combinedImage.createGraphics();
+
+            // Set background to white
+            g2d.setColor(java.awt.Color.WHITE);
+            g2d.fillRect(0, 0, qrWidth, totalHeight);
+
+            // Draw QR code at the top
+            g2d.drawImage(qrImage, 0, 0, null);
+
+            // Set font and color for text
+            g2d.setColor(java.awt.Color.BLACK);
+            FontMetrics fm = g2d.getFontMetrics();
+
+            // Draw machineName centered
+            int nameY = qrHeight + 20; // Position below QR code
+            int nameWidth = fm.stringWidth(machineName);
+            int nameX = (qrWidth - nameWidth) / 2; // Center horizontally
+            g2d.drawString(machineName, nameX, nameY);
+
+            // Draw machineCode centered
+            int codeY = nameY + 20; // Position below machineName
+            int codeWidth = fm.stringWidth(machineCode);
+            int codeX = (qrWidth - codeWidth) / 2; // Center horizontally
+            g2d.drawString(machineCode, codeX, codeY);
+
+            // Clean up
+            g2d.dispose();
+
+            // Convert to Base64
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            ImageIO.write(combinedImage, "PNG", pngOutputStream);
             return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Error generating QR code: " + e.getMessage());
@@ -116,11 +161,6 @@ public class MachineService {
             cell.setCellStyle(headerStyle);
         }
 
-        // Create cell style for QR code cell with wrap text
-        CellStyle qrCellStyle = workbook.createCellStyle();
-        qrCellStyle.setWrapText(true);
-        qrCellStyle.setVerticalAlignment(VerticalAlignment.TOP);
-
         // Data rows
         int rowNum = 1;
         for (Machine machine : machines) {
@@ -154,12 +194,6 @@ public class MachineService {
                 anchor.setDy1(0);
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
                 picture.resize(0.3);
-                // Add machineName and machineCode as text in the same cell
-                Cell qrCell = row.createCell(2);
-                String cellText = (machine.getMachineName() != null ? machine.getMachineName() : "") + "\n" +
-                        (machine.getMachineCode() != null ? machine.getMachineCode() : "");
-                qrCell.setCellValue(cellText);
-                qrCell.setCellStyle(qrCellStyle);
 
                 // Adjust row height to accommodate QR code image and text
                 row.setHeight((short) (250 * 20)); // 250 pixels for image + text
@@ -168,7 +202,6 @@ public class MachineService {
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
-                qrCell.setCellStyle(qrCellStyle);
                 row.setHeight((short) (20 * 20)); // Default row height for text
                 rowNum++;
             }
