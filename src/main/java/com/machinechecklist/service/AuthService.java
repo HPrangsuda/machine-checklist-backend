@@ -122,7 +122,7 @@ public class AuthService {
         String fName = (firstName != null) ? firstName : "";
         String lName = (lastName != null) ? lastName : "";
 
-        String fullName = fName + " " + lName;
+        String fullName = fName + lName;
 
         String encodedFullName = URLEncoder.encode(fullName, StandardCharsets.UTF_8);
 
