@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
@@ -122,7 +123,8 @@ public class AuthService {
         String lName = (lastName != null) ? lastName : "";
 
         String fullName = fName + " " + lName;
-        String encodedFullName = java.util.Base64.getEncoder().encodeToString(fullName.getBytes(StandardCharsets.UTF_8));
+
+        String encodedFullName = URLEncoder.encode(fullName, StandardCharsets.UTF_8);
 
         Cookie cookie = new Cookie("fullname", encodedFullName);
         cookie.setHttpOnly(false);
