@@ -59,7 +59,9 @@ jobs:
           script: |
             sudo chmod -R 777 /opt/acme/machine
             sudo systemctl stop acme.service
-            sudo rm -rf /opt/acme/machine/* # Clear previous contents in machine folder
+
+            sudo find /opt/acme/machine/ -maxdepth 1 -type f -name "*.jar" -delete
+  
             sudo mv /opt/acme/source/*.jar /opt/acme/machine/app.jar
              sudo systemctl start acme.service
             exit 0 # Ensure clean exit
