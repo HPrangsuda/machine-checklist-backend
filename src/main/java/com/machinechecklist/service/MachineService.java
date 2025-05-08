@@ -138,8 +138,7 @@ public class MachineService {
         // Set column widths (in 1/256th of a character width)
         sheet.setColumnWidth(0, 8000); // machineName
         sheet.setColumnWidth(1, 8000); // machineCode
-        // Set QR code column width to fit 200px image
-        sheet.setColumnWidth(2, (int) (Units.pixelToEMU(200) * 256 / Units.DEFAULT_CHARACTER_WIDTH));
+        sheet.setColumnWidth(2, 6000); // QR code image
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -173,7 +172,7 @@ public class MachineService {
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
                 // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
-                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
+                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
                 BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 
                 // Overlay machineCode text on QR code
@@ -208,28 +207,33 @@ public class MachineService {
                 CreationHelper helper = workbook.getCreationHelper();
                 Drawing<?> drawing = sheet.createDrawingPatriarch();
                 ClientAnchor anchor = helper.createClientAnchor();
-
-                // Anchor the image to the cell (column 2, row rowNum)
                 anchor.setCol1(2);
                 anchor.setRow1(rowNum);
-                anchor.setDx1(0); // No horizontal offset
-                anchor.setDy1(0); // No vertical offset
+                anchor.setDx1(Units.pixelToEMU(50)); // Offset to center in cell
+                anchor.setDy1(0);
+                // Set anchor to match QR code size (200px)
                 anchor.setCol2(2);
                 anchor.setRow2(rowNum + 1);
-                anchor.setDx2(Units.pixelToEMU(200)); // Match image width
-                anchor.setDy2(Units.pixelToEMU(200)); // Match image height
-
+                anchor.setDx2(Units.pixelToEMU(250)); // 200px + offset
+                anchor.setDy2(Units.pixelToEMU(200)); // 200px
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
+                // No resize to maintain 1:1 aspect ratio
 
-                // Set row height to fit 200px image
+                // Adjust row height for QR code (200px converted to points)
                 row.setHeight((short) Units.pixelToPoints(200));
 
+                rowNum++; // Move to next row
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
                 row.setHeight((short) (20 * 20)); // Default row height for text
+                rowNum++;
             }
-            rowNum++; // Move to next row
+        }
+
+        // Auto-size columns (optional, as we set widths manually)
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
         }
 
         // Write to byte array
