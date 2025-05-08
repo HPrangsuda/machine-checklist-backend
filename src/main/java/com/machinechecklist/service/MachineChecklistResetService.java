@@ -35,7 +35,7 @@ public class MachineChecklistResetService {
         scheduleAllResets();
     }
 
-    @Scheduled(fixedRate = 3600000) // Refresh schedules every hour
+    @Scheduled(fixedRate = 86400000) // Refresh schedules every day
     public void refreshSchedules() {
         logger.info("Refreshing all checklist schedules");
         cancelAllScheduledTasks();
@@ -85,7 +85,7 @@ public class MachineChecklistResetService {
     private void resetCheckStatus(Long checklistId) {
         MachineChecklist checklist = checklistRepo.findById(checklistId).orElse(null);
         if (checklist != null) {
-            checklist.setCheckStatus("false");
+            checklist.setCheckStatus(false);
             checklistRepo.save(checklist);
             logger.debug("Reset check status for checklist ID {}", checklistId);
         } else {
@@ -101,12 +101,4 @@ public class MachineChecklistResetService {
         scheduledTasks.clear();
     }
 
-    public void updateChecklistSchedule(MachineChecklist checklist) {
-        if (scheduledTasks.containsKey(checklist.getId())) {
-            scheduledTasks.get(checklist.getId()).cancel(false);
-            scheduledTasks.remove(checklist.getId());
-            logger.debug("Cancelled existing schedule for checklist ID {}", checklist.getId());
-        }
-        scheduleReset(checklist);
-    }
 }

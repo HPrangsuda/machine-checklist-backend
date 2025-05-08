@@ -16,7 +16,7 @@ public class MachineChecklistController {
 
     @GetMapping("/machine")
     public ResponseEntity<List<MachineChecklist>> getChecklist(@RequestParam String machineCode) {
-        List<MachineChecklist> checklist = checklistService.getChecklistByMachineCodeAndStatus(machineCode, "false");
+        List<MachineChecklist> checklist = checklistService.getChecklistByMachineCodeAndStatus(machineCode, false);
         return ResponseEntity.ok(checklist);
     }
 

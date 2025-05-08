@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Long> {
-    Optional<ChecklistRecords> findById(Long id);
 
     @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON m.machineCode = cr.machineCode WHERE cr.userId = :personId")
     List<ChecklistRecords> findByUserId(@Param("personId") String personId);

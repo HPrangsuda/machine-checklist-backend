@@ -10,6 +10,7 @@ import com.machinechecklist.repo.MachineRepo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.util.Units;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MachineService {
@@ -123,6 +125,7 @@ public class MachineService {
         machine.setQrCode(qrCodeJson);
 
         if (file != null) {
+            log.info("file not null");
             String filename = fileStorageService.storeFile(file);
             machine.setImage(filename);
         }
@@ -200,12 +203,9 @@ public class MachineService {
                 // Convert modified image to byte array
                 ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
                 ImageIO.write(qrImage, "PNG", pngOutputStream);
-                byte[] qrCodeBytes = pngOutputStream.toByteArray();
 
                 // Add picture to workbook
-                int pictureIdx = workbook.addPicture(qrCodeBytes, Workbook.PICTURE_TYPE_PNG);
                 CreationHelper helper = workbook.getCreationHelper();
-                Drawing<?> drawing = sheet.createDrawingPatriarch();
                 ClientAnchor anchor = helper.createClientAnchor();
                 anchor.setCol1(2);
                 anchor.setRow1(rowNum);
@@ -216,19 +216,17 @@ public class MachineService {
                 anchor.setRow2(rowNum + 1);
                 anchor.setDx2(Units.pixelToEMU(250)); // 200px + offset
                 anchor.setDy2(Units.pixelToEMU(200)); // 200px
-                Picture picture = drawing.createPicture(anchor, pictureIdx);
                 // No resize to maintain 1:1 aspect ratio
 
                 // Adjust row height for QR code (200px converted to points)
                 row.setHeight((short) Units.pixelToPoints(200));
 
-                rowNum++; // Move to next row
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
                 row.setHeight((short) (20 * 20)); // Default row height for text
-                rowNum++;
             }
+            rowNum++; // Move to next row
         }
 
         // Auto-size columns (optional, as we set widths manually)

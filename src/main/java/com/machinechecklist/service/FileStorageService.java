@@ -26,7 +26,7 @@ public class FileStorageService {
         if (originalFilename != null && originalFilename.contains(".")) {
             fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        String newFilename = UUID.randomUUID().toString() + fileExtension;
+        String newFilename = UUID.randomUUID() + fileExtension;
 
         // Save file to upload directory
         Path destinationPath = Paths.get(FileStorageConfig.getUploadDir()).resolve(newFilename);

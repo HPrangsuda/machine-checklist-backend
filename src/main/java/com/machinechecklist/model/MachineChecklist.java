@@ -19,6 +19,9 @@ public class MachineChecklist {
     private Question question;
 
     private String answerChoice;
-    private String checkStatus;
+
+    @Column(name = "check_status", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean checkStatus = false;
+
     private String resetTime;
 }
