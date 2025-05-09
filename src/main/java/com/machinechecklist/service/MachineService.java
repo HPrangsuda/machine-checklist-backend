@@ -138,10 +138,10 @@ public class MachineService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Machine-QRCode");
 
-        // Set column widths
-        sheet.setColumnWidth(0, Units.pixelToEMU(200)); // machineName
-        sheet.setColumnWidth(1, Units.pixelToEMU(200)); // machineCode
-        sheet.setColumnWidth(2, Units.pixelToEMU(250)); // QR code image
+        // Set column widths (in 1/256th of a character width)
+        sheet.setColumnWidth(0, 8000); // machineName
+        sheet.setColumnWidth(1, 8000); // machineCode
+        sheet.setColumnWidth(2, 6000); // QR code image
 
         // Create header row
         Row headerRow = sheet.createRow(0);
@@ -175,68 +175,69 @@ public class MachineService {
             if (machine.getQrCode() != null && !machine.getQrCode().isEmpty()) {
                 // Generate QR code image
                 QRCodeWriter qrCodeWriter = new QRCodeWriter();
-                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 200, 200);
+                BitMatrix bitMatrix = qrCodeWriter.encode(machine.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
                 BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 
                 // Overlay machineCode text on QR code
                 String machineCode = machine.getMachineCode() != null ? machine.getMachineCode() : "";
                 Graphics2D g2d = qrImage.createGraphics();
                 g2d.setColor(Color.BLACK);
-                FontMetrics fontMetrics = g2d.getFontMetrics();
-                int textWidth = fontMetrics.stringWidth(machineCode);
-                int textHeight = fontMetrics.getHeight();
+                int textWidth = g2d.getFontMetrics().stringWidth(machineCode);
+                int textHeight = g2d.getFontMetrics().getHeight();
 
-                // Define bottom region
+                // Define bottom region (bottom 20% of image, e.g., 40px for 200px height)
                 int bottomRegionHeight = 40;
                 int bottomRegionY = qrImage.getHeight() - bottomRegionHeight;
 
-                // Center text
+                // Center text horizontally and vertically in bottom region
                 int x = (qrImage.getWidth() - textWidth) / 2;
-                int y = bottomRegionY + (bottomRegionHeight + textHeight) / 2 - fontMetrics.getDescent();
+                int y = bottomRegionY + (bottomRegionHeight + textHeight) / 2 - g2d.getFontMetrics().getDescent();
 
-                // Draw white background
+                // Draw white background for text readability
                 g2d.setColor(Color.WHITE);
                 g2d.fillRect(x - 5, bottomRegionY, textWidth + 10, bottomRegionHeight);
                 g2d.setColor(Color.BLACK);
                 g2d.drawString(machineCode, x, y);
                 g2d.dispose();
 
-                // Convert to byte array
+                // Convert modified image to byte array
                 ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
                 ImageIO.write(qrImage, "PNG", pngOutputStream);
-                byte[] pngData = pngOutputStream.toByteArray();
+                byte[] qrCodeBytes = pngOutputStream.toByteArray();
 
                 // Add picture to workbook
-                int pictureIdx = workbook.addPicture(pngData, Workbook.PICTURE_TYPE_PNG);
-
-                // Create anchor
+                int pictureIdx = workbook.addPicture(qrCodeBytes, Workbook.PICTURE_TYPE_PNG);
                 CreationHelper helper = workbook.getCreationHelper();
+                Drawing<?> drawing = sheet.createDrawingPatriarch();
                 ClientAnchor anchor = helper.createClientAnchor();
                 anchor.setCol1(2);
                 anchor.setRow1(rowNum);
-                anchor.setDx1(Units.pixelToEMU(10));
-                anchor.setDy1(Units.pixelToEMU(10));
+                anchor.setDx1(Units.pixelToEMU(50)); // Offset to center in cell
+                anchor.setDy1(0);
+                // Set anchor to match QR code size (200px)
                 anchor.setCol2(2);
                 anchor.setRow2(rowNum + 1);
-                anchor.setDx2(Units.pixelToEMU(210));
-                anchor.setDy2(Units.pixelToEMU(210));
+                anchor.setDx2(Units.pixelToEMU(250)); // 200px + offset
+                anchor.setDy2(Units.pixelToEMU(200)); // 200px
 
-                // Add picture to sheet
-                Drawing<?> drawing = sheet.createDrawingPatriarch();
+                //don't delete
                 Picture picture = drawing.createPicture(anchor, pictureIdx);
+                // No resize to maintain 1:1 aspect ratio
 
-                // Adjust row height
-                row.setHeight((short) Units.pixelToPoints(220));
+                // Adjust row height for QR code (200px converted to points)
+                row.setHeight((short) Units.pixelToPoints(200));
+
+                rowNum++; // Move to next row
             } else {
                 Cell qrCell = row.createCell(2);
                 qrCell.setCellValue("No QR Code");
-                row.setHeight((short) (20 * 20));
+                row.setHeight((short) (20 * 20)); // Default row height for text
+                rowNum++;
             }
-            rowNum++;
         }
 
-        // Auto-size text columns only
-        for (int i = 0; i < headers.length - 1; i++) {
+        // Auto-size columns (optional, as we set widths manually)
+        for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
 
