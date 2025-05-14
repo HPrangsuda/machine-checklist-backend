@@ -60,6 +60,7 @@ public class AuthService {
                 setAccessTokenCookie(token, httpResponse);
                 setAccessRefreshCookie(refreshToken, httpResponse);
                 setUsername(getUSer.getUsername(), httpResponse);
+                setRole(String.valueOf(getUSer.getRole()), httpResponse);
 
                 String firstName = getUSer.getFirstName() != null ? getUSer.getFirstName() : "";
                 String lastName = getUSer.getLastName() != null ? getUSer.getLastName() : "";
@@ -70,6 +71,7 @@ public class AuthService {
                 response.put("refreshToken", refreshToken);
                 response.put("username", loginRequest.getUsername());
                 response.put("fullName", getUSer.getFirstName()+" "+getUSer.getLastName() );
+                response.put("role", getUSer.getRole());
             }else{
                 response.put("msg", "User authentication failed");
                 response.put("code", 1302);
@@ -127,6 +129,16 @@ public class AuthService {
         String encodedFullName = URLEncoder.encode(fullName, StandardCharsets.UTF_8);
 
         Cookie cookie = new Cookie("fullname", encodedFullName);
+        cookie.setHttpOnly(false);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * constant.getJwtSecretExpMin());
+        response.addCookie(cookie);
+    }
+
+    private void setRole(String role, HttpServletResponse response) {
+        String encodedRole = URLEncoder.encode(role, StandardCharsets.UTF_8);
+        Cookie cookie = new Cookie("role", encodedRole);
         cookie.setHttpOnly(false);
         cookie.setSecure(false);
         cookie.setPath("/");
