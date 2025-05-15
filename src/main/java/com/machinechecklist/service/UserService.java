@@ -70,6 +70,7 @@ public class UserService {
 
     public User updateUser(Long id, User updatedUser) {
         return userRepo.findById(id).map(user -> {
+            user.setEmployeeId(updatedUser.getEmployeeId());
             user.setFirstName(updatedUser.getFirstName());
             user.setLastName(updatedUser.getLastName());
             user.setNickName(updatedUser.getNickName());
@@ -77,7 +78,7 @@ public class UserService {
             user.setStatus(updatedUser.getStatus());
             user.setDepartment(updatedUser.getDepartment());
             user.setRole(updatedUser.getRole());
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             return userRepo.save(user);
         }).orElseThrow(() -> new RuntimeException("User not found"));
     }
