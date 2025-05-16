@@ -261,7 +261,7 @@ public class MachineService {
 
     }
 
-    public Machine updateMachine(Long id, Machine updatedMachine) {
+    public Machine updateMachine(Long id, Machine updatedMachine, MultipartFile file) {
         Optional<Machine> existingMachine = machineRepo.findById(id);
         if (existingMachine.isPresent()) {
             Machine machine = existingMachine.get();
