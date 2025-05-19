@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Long> {
@@ -20,5 +20,9 @@ public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Lo
             "((c.checklistStatus = 'รอหัวหน้างานตรวจสอบ' AND c.supervisor = :personId) OR " +
             "(c.checklistStatus = 'รอผู้จัดการฝ่ายตรวจสอบ' AND c.manager = :personId))")
     List<ChecklistRecords> findByManagerOrSupervisor(String personId);
+
     List<ChecklistRecords> findByChecklistStatusIn(List<String> statuses);
+
+    List<ChecklistRecords> findByMachineCodeAndUserIdAndDateCreatedBetween(
+            String machineCode, String userId, Date start, Date end);
 }
