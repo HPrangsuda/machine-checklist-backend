@@ -42,4 +42,5 @@ public class ChecklistRecords {
     private Date dateManagerChecked;
 
     private String checklistStatus;
+    private String reasonNotChecked;
 }
