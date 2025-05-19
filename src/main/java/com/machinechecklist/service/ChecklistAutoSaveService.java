@@ -19,10 +19,10 @@ public class ChecklistAutoSaveService {
     private final MachineRepo machineRepo;
     private final ChecklistRecordsRepo checklistRecordsRepo;
 
-    @Scheduled(cron = "0 27 15 * * MON", zone = "Asia/Bangkok")
+    @Scheduled(cron = "0 59 23 * * FRI")
     @Transactional
     public void autoSaveChecklistRecords() {
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Bangkok"));
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
         LocalDate monday = today.with(DayOfWeek.MONDAY);
         LocalDate friday = today.with(DayOfWeek.FRIDAY);
 
@@ -60,6 +60,7 @@ public class ChecklistAutoSaveService {
             record.setMachineStatus(machine.getMachineStatus());
             record.setManager(machine.getManagerId());
             record.setRecheck(true);
+            record.setReasonNotChecked("ไม่ได้ดำเนินการ");
             record.setSupervisor(machine.getSupervisorId());
             record.setUserId(machine.getResponsiblePersonId());
             record.setUserName(machine.getResponsiblePersonName());

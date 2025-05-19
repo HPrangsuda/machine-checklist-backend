@@ -28,7 +28,7 @@ public class ChecklistRecordsService {
     private final ObjectMapper objectMapper;
 
 
-    @Scheduled(cron = "0 1 0 * * MON", zone = "Asia/Bangkok")
+    @Scheduled(cron = "0 1 0 * * MON")
     @Transactional
     public void updateOverdueChecklists() {
         List<ChecklistRecords> pendingRecords = checklistRecordsRepo.findByChecklistStatusIn(
@@ -90,7 +90,7 @@ public class ChecklistRecordsService {
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
 
-            LocalDate today = LocalDate.now(ZoneId.of("Asia/Bangkok"));
+            LocalDate today = LocalDate.now(ZoneId.systemDefault());
             if (today.getDayOfWeek() == DayOfWeek.FRIDAY && Objects.equals(responsibleId, record.getUserId())) {
                 if(machine.getSupervisorId() != null) {
                     record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");

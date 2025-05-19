@@ -12,6 +12,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          time_zone=Asia/Bangkok:
   servlet:
     multipart:
       max-file-size: 10MB
