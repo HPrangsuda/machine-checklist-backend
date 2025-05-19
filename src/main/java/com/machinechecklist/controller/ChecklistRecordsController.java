@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/checklist-records")
@@ -49,8 +48,10 @@ public class ChecklistRecordsController {
     }
 
     @PutMapping("/approve/{checklistId}")
-    public ResponseEntity<ChecklistRecords> approveChecklist(@PathVariable Long checklistId) {
-        ChecklistRecords updatedChecklist = checklistRecordsService.approveChecklist(checklistId);
+    public ResponseEntity<ChecklistRecords> approveChecklist(
+            @PathVariable Long checklistId,
+            @RequestBody ChecklistRequestDTO request) {
+        ChecklistRecords updatedChecklist = checklistRecordsService.approveChecklist(checklistId, request);
         return ResponseEntity.ok(updatedChecklist);
     }
 }
