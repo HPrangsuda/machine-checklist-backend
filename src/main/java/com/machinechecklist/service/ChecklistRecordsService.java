@@ -111,7 +111,7 @@ public class ChecklistRecordsService {
         }
     }
 
-    public ChecklistRecords approveChecklist(Long checklistId, ChecklistRequestDTO request) {
+    public ChecklistRecords approveChecklist(Long checklistId, ChecklistRecords request) {
         ChecklistRecords checklist = checklistRecordsRepo.findById(checklistId)
                 .orElseThrow(() -> new RuntimeException("Checklist not found with id: " + checklistId));
 
@@ -120,12 +120,12 @@ public class ChecklistRecordsService {
 
         if ("รอหัวหน้างานตรวจสอบ".equals(checklist.getChecklistStatus())) {
             checklist.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
-            checklist.setReasonNotChecked(checklist.getReasonNotChecked());
+            checklist.setReasonNotChecked(request.getReasonNotChecked());
             checklist.setDateSupervisorChecked(new Date());
             machine.setCheckStatus("รอผู้จัดการฝ่ายตรวจสอบ");
         } else if ("รอผู้จัดการฝ่ายตรวจสอบ".equals(checklist.getChecklistStatus())) {
             checklist.setChecklistStatus("ดำเนินการเสร็จสิ้น");
-            checklist.setReasonNotChecked(checklist.getReasonNotChecked());
+            checklist.setReasonNotChecked(request.getReasonNotChecked());
             checklist.setDateManagerChecked(new Date());
             machine.setCheckStatus("ดำเนินการเสร็จสิ้น");
         } else {

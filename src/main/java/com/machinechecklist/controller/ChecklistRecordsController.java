@@ -50,7 +50,7 @@ public class ChecklistRecordsController {
     @PutMapping("/approve/{checklistId}")
     public ResponseEntity<ChecklistRecords> approveChecklist(
             @PathVariable Long checklistId,
-            @RequestBody ChecklistRequestDTO request) {
+            @RequestBody ChecklistRecords request) {
         ChecklistRecords updatedChecklist = checklistRecordsService.approveChecklist(checklistId, request);
         return ResponseEntity.ok(updatedChecklist);
     }
