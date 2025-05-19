@@ -92,7 +92,11 @@ public class ChecklistRecordsService {
 
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Bangkok"));
             if (today.getDayOfWeek() == DayOfWeek.FRIDAY && Objects.equals(responsibleId, record.getUserId())) {
-                record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
+                if(machine.getSupervisorId() != null) {
+                    record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
+                }else {
+                    record.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
+                }
                 record.setRecheck(true);
             } else {
                 record.setChecklistStatus("ดำเนินการเสร็จสิ้น");

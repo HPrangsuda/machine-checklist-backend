@@ -19,7 +19,7 @@ public class ChecklistAutoSaveService {
     private final MachineRepo machineRepo;
     private final ChecklistRecordsRepo checklistRecordsRepo;
 
-    @Scheduled(cron = "0 59 14 * * MON", zone = "Asia/Bangkok")
+    @Scheduled(cron = "0 25 15 * * FRI", zone = "Asia/Bangkok")
     @Transactional
     public void autoSaveChecklistRecords() {
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Bangkok"));
@@ -46,18 +46,23 @@ public class ChecklistAutoSaveService {
     private void createDefaultChecklistRecord(Machine machine) {
         try {
             ChecklistRecords record = new ChecklistRecords();
+
+            if(machine.getSupervisorId() != null) {
+                record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
+            }else {
+                record.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
+            }
+            record.setDateCreated(new Date());
+            record.setMachineChecklist("");
             record.setMachineCode(machine.getMachineCode());
             record.setMachineName(machine.getMachineName());
-            record.setMachineStatus("ปกติ");
-            record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
-            record.setRecheck(true);record.setMachineChecklist("");
-            record.setMachineNote("บันทึกอัตโนมัติเมื่อไม่มีรายการตรวจสอบในสัปดาห์");
+            record.setMachineNote("บันทึกอัตโนมัติ");
+            record.setMachineStatus(machine.getMachineStatus());
+            record.setManager(machine.getManagerId());
+            record.setRecheck(true);
+            record.setSupervisor(machine.getSupervisorId());
             record.setUserId(machine.getResponsiblePersonId());
-            record.setUserName("ระบบอัตโนมัติ");
-            record.setSupervisor("");
-            record.setManager("");
-            record.setDateCreated(new Date());
-
+            record.setUserName(machine.getResponsiblePersonName());
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
