@@ -118,8 +118,7 @@ public class ChecklistRecordsService {
             Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
             if (kpiOptional.isPresent()) {
                 Kpi kpi = kpiOptional.get();
-                int currentChecked = Integer.parseInt(kpi.getChecked());
-                kpi.setChecked(String.valueOf(currentChecked + 1));
+                kpi.setChecked(kpi.getChecked() + 1);
                 kpiRepo.save(kpi);
             } else {
                 throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
@@ -162,8 +161,7 @@ public class ChecklistRecordsService {
             Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
             if (kpiOptional.isPresent()) {
                 Kpi kpi = kpiOptional.get();
-                int currentChecked = Integer.parseInt(kpi.getChecked());
-                kpi.setChecked(String.valueOf(currentChecked + 1));
+                kpi.setChecked(kpi.getChecked() + 1); // Increment long directly
                 kpiRepo.save(kpi);
             } else {
                 throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);

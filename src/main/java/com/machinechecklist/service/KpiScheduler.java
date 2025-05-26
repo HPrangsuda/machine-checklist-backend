@@ -45,8 +45,8 @@ public class KpiScheduler {
             kpi.setEmployeeId(responsiblePersonId);
             kpi.setYear(year);
             kpi.setMonth(month);
-            kpi.setCheckAll(String.valueOf(fridays * machineCount));
-            kpi.setChecked("0");
+            kpi.setCheckAll(fridays * machineCount);
+            kpi.setChecked(0L);
 
             kpiRepo.save(kpi);
         });

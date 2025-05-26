@@ -17,6 +17,6 @@ public class Kpi {
     private String employeeId;
     private String year;
     private String month;
-    private String checkAll;
-    private String checked;
+    private Long checkAll;
+    private Long checked;
 }
