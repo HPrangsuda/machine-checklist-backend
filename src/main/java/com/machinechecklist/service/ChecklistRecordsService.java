@@ -3,6 +3,7 @@ package com.machinechecklist.service;
 import com.machinechecklist.model.*;
 import com.machinechecklist.repo.ChecklistRecordsRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.machinechecklist.repo.KpiRepo;
 import com.machinechecklist.repo.MachineRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class ChecklistRecordsService {
     private final FileStorageService fileStorageService;
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
+    private final KpiRepo kpiRepo;
     private final ObjectMapper objectMapper;
 
 
@@ -109,6 +111,20 @@ public class ChecklistRecordsService {
             machine.setCheckStatus(savedRecord.getChecklistStatus());
             machineRepo.save(machine);
 
+            // Update Kpi.checked
+            LocalDate currentDate = LocalDate.now();
+            String year = String.valueOf(currentDate.getYear());
+            String month = String.format("%02d", currentDate.getMonthValue());
+            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
+            if (kpiOptional.isPresent()) {
+                Kpi kpi = kpiOptional.get();
+                int currentChecked = Integer.parseInt(kpi.getChecked());
+                kpi.setChecked(String.valueOf(currentChecked + 1));
+                kpiRepo.save(kpi);
+            } else {
+                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
+            }
+
             return savedRecord;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save checklist record: " + e.getMessage());
@@ -122,6 +138,9 @@ public class ChecklistRecordsService {
         Machine machine = machineRepo.findByMachineCode(checklist.getMachineCode())
                 .orElseThrow(() -> new RuntimeException("Machine not found with code: " + checklist.getMachineCode()));
 
+        String responsibleId = machine.getResponsiblePersonId();
+        String reasonNotChecked = request.getReasonNotChecked();
+
         if ("รอหัวหน้างานตรวจสอบ".equals(checklist.getChecklistStatus())) {
             checklist.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
             checklist.setReasonNotChecked(request.getReasonNotChecked());
@@ -134,6 +153,21 @@ public class ChecklistRecordsService {
             machine.setCheckStatus("ดำเนินการเสร็จสิ้น");
         } else {
             throw new RuntimeException("Invalid checklist status for approval: " + checklist.getChecklistStatus());
+        }
+
+        if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
+            LocalDate currentDate = LocalDate.now();
+            String year = String.valueOf(currentDate.getYear());
+            String month = String.format("%02d", currentDate.getMonthValue());
+            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
+            if (kpiOptional.isPresent()) {
+                Kpi kpi = kpiOptional.get();
+                int currentChecked = Integer.parseInt(kpi.getChecked());
+                kpi.setChecked(String.valueOf(currentChecked + 1));
+                kpiRepo.save(kpi);
+            } else {
+                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
+            }
         }
 
         machineRepo.save(machine);

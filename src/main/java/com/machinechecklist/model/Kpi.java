@@ -1,0 +1,22 @@
+package com.machinechecklist.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+@Entity
+@Table(name = "kpi")
+@Data
+@RequiredArgsConstructor
+public class Kpi {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    private String employeeId;
+    private String year;
+    private String month;
+    private String checkAll;
+    private String checked;
+}

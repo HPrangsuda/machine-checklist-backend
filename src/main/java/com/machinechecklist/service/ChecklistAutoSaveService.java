@@ -26,8 +26,8 @@ public class ChecklistAutoSaveService {
         LocalDate monday = today.with(DayOfWeek.MONDAY);
         LocalDate friday = today.with(DayOfWeek.FRIDAY);
 
-        Date startOfWeek = Date.from(monday.atStartOfDay(ZoneId.of("Asia/Bangkok")).toInstant());
-        Date endOfWeek = Date.from(friday.atTime(23, 59, 59).atZone(ZoneId.of("Asia/Bangkok")).toInstant());
+        Date startOfWeek = Date.from(monday.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfWeek = Date.from(friday.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
         List<Machine> machines = machineRepo.findAll();
 
