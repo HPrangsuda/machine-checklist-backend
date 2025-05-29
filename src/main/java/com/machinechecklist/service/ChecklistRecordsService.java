@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -157,8 +158,8 @@ public class ChecklistRecordsService {
 
         if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
             LocalDate currentDate = LocalDate.now();
-            String year = String.valueOf(currentDate.getYear());
-            String month = String.format("%02d", currentDate.getMonthValue());
+            String year = new SimpleDateFormat("yyyy").format(checklist.getDateCreated());
+            String month = new SimpleDateFormat("MM").format(checklist.getDateCreated());
             Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
             if (kpiOptional.isPresent()) {
                 Kpi kpi = kpiOptional.get();
