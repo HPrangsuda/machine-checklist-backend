@@ -155,19 +155,19 @@ public class ChecklistRecordsService {
             throw new RuntimeException("Invalid checklist status for approval: " + checklist.getChecklistStatus());
         }
 
-//        if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
-//            LocalDate currentDate = LocalDate.now();
-//            String year = String.valueOf(currentDate.getYear());
-//            String month = String.format("%02d", currentDate.getMonthValue());
-//            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
-//            if (kpiOptional.isPresent()) {
-//                Kpi kpi = kpiOptional.get();
-//                kpi.setChecked(kpi.getChecked() + 1); // Increment long directly
-//                kpiRepo.save(kpi);
-//            } else {
-//                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
-//            }
-//        }
+        if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
+            LocalDate currentDate = LocalDate.now();
+            String year = String.valueOf(currentDate.getYear());
+            String month = String.format("%02d", currentDate.getMonthValue());
+            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
+            if (kpiOptional.isPresent()) {
+                Kpi kpi = kpiOptional.get();
+                kpi.setChecked(kpi.getChecked() + 1);
+                kpiRepo.save(kpi);
+            } else {
+                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
+            }
+        }
 
         machineRepo.save(machine);
         return checklistRecordsRepo.save(checklist);
