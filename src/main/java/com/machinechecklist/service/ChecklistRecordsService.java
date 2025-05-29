@@ -111,17 +111,18 @@ public class ChecklistRecordsService {
             machine.setCheckStatus(savedRecord.getChecklistStatus());
             machineRepo.save(machine);
 
-            // Update Kpi.checked
-            LocalDate currentDate = LocalDate.now();
-            String year = String.valueOf(currentDate.getYear());
-            String month = String.format("%02d", currentDate.getMonthValue());
-            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
-            if (kpiOptional.isPresent()) {
-                Kpi kpi = kpiOptional.get();
-                kpi.setChecked(kpi.getChecked() + 1);
-                kpiRepo.save(kpi);
-            } else {
-                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
+            if (Objects.equals(responsibleId, record.getUserId())) {
+                LocalDate currentDate = LocalDate.now();
+                String year = String.valueOf(currentDate.getYear());
+                String month = String.format("%02d", currentDate.getMonthValue());
+                Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
+                if (kpiOptional.isPresent()) {
+                    Kpi kpi = kpiOptional.get();
+                    kpi.setChecked(kpi.getChecked() + 1);
+                    kpiRepo.save(kpi);
+                } else {
+                    throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
+                }
             }
 
             return savedRecord;
