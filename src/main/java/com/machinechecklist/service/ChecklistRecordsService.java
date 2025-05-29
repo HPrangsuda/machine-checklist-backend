@@ -156,18 +156,11 @@ public class ChecklistRecordsService {
             throw new RuntimeException("Invalid checklist status for approval: " + checklist.getChecklistStatus());
         }
 
-        if (reasonNotChecked != null && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
+        if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
             String year = new SimpleDateFormat("yyyy").format(checklist.getDateCreated());
             String month = new SimpleDateFormat("MM").format(checklist.getDateCreated());
-            System.out.println(year + "-" + month);
             Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
-            if (kpiOptional.isPresent()) {
-                Kpi kpi = kpiOptional.get();
-                kpi.setChecked(kpi.getChecked() + 1);
-                kpiRepo.save(kpi);
-            } else {
-                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
-            }
+
         }
 
         machineRepo.save(machine);
