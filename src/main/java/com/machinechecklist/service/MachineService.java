@@ -273,7 +273,6 @@ public class MachineService {
             machine.setManagerName(updatedMachine.getManagerName());
             machine.setFrequency(updatedMachine.getFrequency());
             machine.setMachineStatus(updatedMachine.getMachineStatus());
-            machine.setMachineTypeName(updatedMachine.getMachineTypeName());
             return machineRepo.save(machine);
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
