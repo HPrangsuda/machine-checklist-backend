@@ -17,8 +17,14 @@ public interface MachineChecklistRepo extends JpaRepository<MachineChecklist, Lo
         return findByMachineCodeAndCheckStatus(machineCode, checkStatus, Sort.by(Sort.Direction.ASC, "id"));
     }
 
-    @Query("SELECT m FROM MachineChecklist m WHERE m.checkStatus = :checkStatus")
-    List<MachineChecklist> findByCheckStatus(Boolean checkStatus);
+    List<MachineChecklist> findByMachineCodeAndResetTime(String machineCode, String s, Sort id);
+
+    default List<MachineChecklist> findByMachineCodeAndResetTime(String machineCode) {
+        return findByMachineCodeAndResetTime(machineCode, "0 0 0 * * MON", Sort.by(Sort.Direction.ASC, "id"));
+    }
+
+//    @Query("SELECT m FROM MachineChecklist m WHERE m.checkStatus = :checkStatus")
+//    List<MachineChecklist> findByCheckStatus(Boolean checkStatus);
 
     @Modifying
     @Query("UPDATE MachineChecklist m SET m.checkStatus = false WHERE m.id = :id")

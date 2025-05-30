@@ -1,6 +1,5 @@
 package com.machinechecklist.controller;
 
-import com.machinechecklist.model.Machine;
 import com.machinechecklist.model.MachineChecklist;
 import com.machinechecklist.service.MachineChecklistService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +16,12 @@ public class MachineChecklistController {
     @GetMapping("/machine")
     public ResponseEntity<List<MachineChecklist>> getChecklist(@RequestParam String machineCode) {
         List<MachineChecklist> checklist = checklistService.getChecklistByMachineCodeAndStatus(machineCode, false);
+        return ResponseEntity.ok(checklist);
+    }
+
+    @GetMapping("/machine/general")
+    public ResponseEntity<List<MachineChecklist>> getChecklistGeneral(@RequestParam String machineCode) {
+        List<MachineChecklist> checklist = checklistService.getChecklistByMachineCodeAndResetTime(machineCode);
         return ResponseEntity.ok(checklist);
     }
 

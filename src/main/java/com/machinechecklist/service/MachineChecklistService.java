@@ -16,6 +16,10 @@ public class MachineChecklistService {
         return checklistRepo.findByMachineCodeAndCheckStatus(machineCode, checkStatus);
     }
 
+    public List<MachineChecklist> getChecklistByMachineCodeAndResetTime(String machineCode) {
+        return checklistRepo.findByMachineCodeAndResetTime(machineCode);
+    }
+
     public void resetChecklistStatus(Long id) {
         checklistRepo.resetCheckStatusById(id);
     }
