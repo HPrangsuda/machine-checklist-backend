@@ -29,7 +29,7 @@ public class ChecklistRecordsService {
     private final FileStorageService fileStorageService;
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
-    private MachineChecklistRepo machineChecklistRepo;
+    private final MachineChecklistRepo machineChecklistRepo;
     private final KpiRepo kpiRepo;
     private final ObjectMapper objectMapper;
 
