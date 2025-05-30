@@ -118,6 +118,7 @@ public class ChecklistRecordsService {
                     MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
                             .orElseThrow(() -> new RuntimeException("Checklist item not found with id: " + item.getId()));
                     checklist.setCheckStatus(true);
+                    System.out.println(checklist.getCheckStatus());
                     machineChecklistRepo.save(checklist);
                 } else {
                     throw new RuntimeException("Checklist item id is missing");
