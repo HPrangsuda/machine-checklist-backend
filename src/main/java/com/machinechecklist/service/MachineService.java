@@ -24,6 +24,10 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.List;
 
@@ -261,19 +265,38 @@ public class MachineService {
 
     }
 
-    public Machine updateMachine(Long id, Machine updatedMachine, MultipartFile file) {
+    public Machine updateMachine(Long id, Machine formData, MultipartFile file) throws IOException {
         Optional<Machine> existingMachine = machineRepo.findById(id);
         if (existingMachine.isPresent()) {
             Machine machine = existingMachine.get();
-            machine.setResponsiblePersonId(updatedMachine.getResponsiblePersonId());
-            machine.setResponsiblePersonName(updatedMachine.getResponsiblePersonName());
-            machine.setSupervisorId(updatedMachine.getSupervisorId());
-            machine.setSupervisorName(updatedMachine.getSupervisorName());
-            machine.setManagerId(updatedMachine.getManagerId());
-            machine.setManagerName(updatedMachine.getManagerName());
-            machine.setFrequency(updatedMachine.getFrequency());
-            machine.setMachineStatus(updatedMachine.getMachineStatus());
-            machine.setMachineTypeName(updatedMachine.getMachineTypeName());
+
+            // Update machine fields from formData
+            machine.setMachineName(formData.getMachineName());
+            machine.setMachineModel(formData.getMachineModel());
+            machine.setMachineCode(formData.getMachineCode());
+            machine.setMachineNumber(formData.getMachineNumber());
+            machine.setResponsiblePersonId(formData.getResponsiblePersonId());
+            machine.setResponsiblePersonName(formData.getResponsiblePersonName());
+            machine.setSupervisorId(formData.getSupervisorId());
+            machine.setSupervisorName(formData.getSupervisorName());
+            machine.setManagerId(formData.getManagerId());
+            machine.setManagerName(formData.getManagerName());
+            machine.setFrequency(formData.getFrequency());
+            machine.setMachineStatus(formData.getMachineStatus());
+            machine.setMachineTypeName(formData.getMachineTypeName());
+
+            // Handle image upload
+            if (file != null && !file.isEmpty()) {
+                String fileName = id + "_" + file.getOriginalFilename();
+                Path uploadPath = Paths.get("uploads/machines/");
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                machine.setImage(filePath.toString());
+            }
+
             return machineRepo.save(machine);
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
