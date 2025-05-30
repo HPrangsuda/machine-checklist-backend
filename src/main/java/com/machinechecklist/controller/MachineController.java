@@ -98,12 +98,9 @@ public class MachineController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Machine> updateMachine(
-            @PathVariable Long id,
-            @RequestPart("formData") Machine machine,
-            @RequestPart(value = "image", required = false) MultipartFile file) {
+    public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine machine) {
         try {
-            Machine updatedMachine = machineService.updateMachine(id, machine, file);
+            Machine updatedMachine = machineService.updateMachine(id, machine);
             return ResponseEntity.ok(updatedMachine);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
