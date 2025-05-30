@@ -112,7 +112,7 @@ public class ChecklistRecordsService {
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
 
             for (ChecklistItemDTO item : request.getChecklistItems()) {
-                System.out.println("sss");
+                System.out.println(item.getId());
                 //if (item.getId() != null) {
 
 //                    MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
