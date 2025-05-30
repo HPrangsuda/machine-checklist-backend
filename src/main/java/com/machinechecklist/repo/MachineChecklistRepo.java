@@ -11,6 +11,8 @@ import java.util.List;
 
 @Repository
 public interface MachineChecklistRepo extends JpaRepository<MachineChecklist, Long> {
+    List<MachineChecklist> findByMachineCode(String machineCode);
+
     List<MachineChecklist> findByMachineCodeAndCheckStatus(String machineCode, Boolean checkStatus, Sort sort);
 
     default List<MachineChecklist> findByMachineCodeAndCheckStatus(String machineCode, Boolean checkStatus) {

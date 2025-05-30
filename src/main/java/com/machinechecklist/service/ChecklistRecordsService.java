@@ -1,9 +1,11 @@
 package com.machinechecklist.service;
 
+import com.machinechecklist.dto.ChecklistItemDTO;
 import com.machinechecklist.model.*;
 import com.machinechecklist.repo.ChecklistRecordsRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.machinechecklist.repo.KpiRepo;
+import com.machinechecklist.repo.MachineChecklistRepo;
 import com.machinechecklist.repo.MachineRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class ChecklistRecordsService {
     private final FileStorageService fileStorageService;
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
+    private MachineChecklistRepo machineChecklistRepo;
     private final KpiRepo kpiRepo;
     private final ObjectMapper objectMapper;
 
@@ -107,6 +110,18 @@ public class ChecklistRecordsService {
             }
 
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
+
+            for (ChecklistItemDTO item : request.getChecklistItems()) {
+                if (item.getId() != null) {
+                    MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
+                            .orElseThrow(() -> new RuntimeException("Checklist item not found with id: " + item.getId()));
+                    checklist.setCheckStatus(true);
+                    checklist.setAnswerChoice(item.getAnswerChoice());
+                    machineChecklistRepo.save(checklist);
+                } else {
+                    throw new RuntimeException("Checklist item id is missing");
+                }
+            }
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machine.setCheckStatus(savedRecord.getChecklistStatus());
