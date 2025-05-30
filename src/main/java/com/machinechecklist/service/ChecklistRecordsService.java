@@ -111,25 +111,25 @@ public class ChecklistRecordsService {
 
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
 
-            for (ChecklistItemDTO item : request.getChecklistItems()) {
-                System.out.println(item.getId());
-                if (item.getId() != null) {
-
-                    MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
-                            .orElseThrow(() -> new RuntimeException("Checklist item not found with id: " + item.getId()));
-                    checklist.setCheckStatus(true);
-                    System.out.println(checklist.getCheckStatus());
-                    machineChecklistRepo.save(checklist);
-                } else {
-                    throw new RuntimeException("Checklist item id is missing");
-                }
-            }
-
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machine.setCheckStatus(savedRecord.getChecklistStatus());
             machineRepo.save(machine);
 
             if (Objects.equals(responsibleId, record.getUserId())) {
+                //update checkStatus
+                for (ChecklistItemDTO item : request.getChecklistItems()) {
+                    if (item.getId() != null) {
+
+                        MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
+                                .orElseThrow(() -> new RuntimeException("Checklist item not found with id: " + item.getId()));
+                        checklist.setCheckStatus(true);
+                        machineChecklistRepo.save(checklist);
+                    } else {
+                        throw new RuntimeException("Checklist item id is missing");
+                    }
+                }
+
+                //KPI
                 LocalDate currentDate = LocalDate.now();
                 String year = String.valueOf(currentDate.getYear());
                 String month = String.format("%02d", currentDate.getMonthValue());

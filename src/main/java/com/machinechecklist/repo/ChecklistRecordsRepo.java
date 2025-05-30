@@ -12,13 +12,13 @@ import java.util.List;
 @Repository
 public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Long> {
 
-    @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON m.machineCode = cr.machineCode WHERE cr.userId = :personId")
+    @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON m.machineCode = cr.machineCode WHERE cr.userId = :personId ORDER BY cr.checklistId DESC")
     List<ChecklistRecords> findByUserId(@Param("personId") String personId);
 
     @Query("SELECT c FROM ChecklistRecords c WHERE " +
             "c.recheck = true AND " +
             "((c.checklistStatus = 'รอหัวหน้างานตรวจสอบ' AND c.supervisor = :personId) OR " +
-            "(c.checklistStatus = 'รอผู้จัดการฝ่ายตรวจสอบ' AND c.manager = :personId))")
+            "(c.checklistStatus = 'รอผู้จัดการฝ่ายตรวจสอบ' AND c.manager = :personId)) ORDER BY c.checklistId ASC")
     List<ChecklistRecords> findByManagerOrSupervisor(String personId);
 
     List<ChecklistRecords> findByChecklistStatusIn(List<String> statuses);

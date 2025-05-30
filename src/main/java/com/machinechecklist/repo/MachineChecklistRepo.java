@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface MachineChecklistRepo extends JpaRepository<MachineChecklist, Long> {
-    List<MachineChecklist> findByMachineCode(String machineCode);
 
     List<MachineChecklist> findByMachineCodeAndCheckStatus(String machineCode, Boolean checkStatus, Sort sort);
 
@@ -24,9 +23,6 @@ public interface MachineChecklistRepo extends JpaRepository<MachineChecklist, Lo
     default List<MachineChecklist> findByMachineCodeAndResetTime(String machineCode) {
         return findByMachineCodeAndResetTime(machineCode, "0 0 0 * * MON", Sort.by(Sort.Direction.ASC, "id"));
     }
-
-//    @Query("SELECT m FROM MachineChecklist m WHERE m.checkStatus = :checkStatus")
-//    List<MachineChecklist> findByCheckStatus(Boolean checkStatus);
 
     @Modifying
     @Query("UPDATE MachineChecklist m SET m.checkStatus = false WHERE m.id = :id")

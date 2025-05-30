@@ -28,6 +28,6 @@ public class MachineChecklistController {
     @PostMapping("/reset/{id}")
     public ResponseEntity<String> resetChecklist(@PathVariable Long id) {
         checklistService.resetChecklistStatus(id);
-        return ResponseEntity.ok("รีเซ็ต checklist ID " + id + " สำเร็จ");
+        return ResponseEntity.ok("Reset checklist ID " + id + " completed");
     }
 }
