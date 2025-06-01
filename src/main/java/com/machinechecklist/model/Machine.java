@@ -13,6 +13,8 @@ public class Machine {
     @Column(name = "id")
     private Long id;
 
+    private String department;
+
     @Column(unique = true, nullable = false)
     private String machineCode;
 

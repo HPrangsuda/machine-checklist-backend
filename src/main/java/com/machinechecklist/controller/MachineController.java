@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MachineController {
     private final MachineService machineService;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     private final FileStorageService fileStorageService;
 
     @GetMapping
@@ -97,12 +97,13 @@ public class MachineController {
         return ResponseEntity.ok(savedMachine);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine machine) {
+    @PutMapping(value = "/update/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Machine> updateMachine(@PathVariable Long id, @RequestBody Machine updatedMachine) {
         try {
-            Machine updatedMachine = machineService.updateMachine(id, machine);
-            return ResponseEntity.ok(updatedMachine);
+            Machine result = machineService.updateMachine(id, updatedMachine);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
+            System.err.println("Error updating machine: " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
         }
     }

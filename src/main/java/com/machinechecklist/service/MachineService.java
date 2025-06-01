@@ -265,14 +265,15 @@ public class MachineService {
         Optional<Machine> existingMachine = machineRepo.findById(id);
         if (existingMachine.isPresent()) {
             Machine machine = existingMachine.get();
+
             machine.setResponsiblePersonId(updatedMachine.getResponsiblePersonId());
             machine.setResponsiblePersonName(updatedMachine.getResponsiblePersonName());
             machine.setSupervisorId(updatedMachine.getSupervisorId());
             machine.setSupervisorName(updatedMachine.getSupervisorName());
             machine.setManagerId(updatedMachine.getManagerId());
             machine.setManagerName(updatedMachine.getManagerName());
-            machine.setFrequency(updatedMachine.getFrequency());
             machine.setMachineStatus(updatedMachine.getMachineStatus());
+
             return machineRepo.save(machine);
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
