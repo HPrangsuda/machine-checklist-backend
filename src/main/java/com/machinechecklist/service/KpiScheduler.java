@@ -20,7 +20,7 @@ public class KpiScheduler {
     private final MachineRepo machineRepo;
     private final KpiRepo kpiRepo;
 
-    @Scheduled(cron = "0 1 0 1 * ?")
+    @Scheduled(cron = "0 25 0 2 * ?")
     public void createKpiRecords() {
         LocalDate currentDate = LocalDate.now();
         String year = String.valueOf(currentDate.getYear());
