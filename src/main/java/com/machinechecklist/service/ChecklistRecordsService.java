@@ -160,10 +160,17 @@ public class ChecklistRecordsService {
         String reasonNotChecked = request.getReasonNotChecked();
 
         if ("รอหัวหน้างานตรวจสอบ".equals(checklist.getChecklistStatus())) {
-            checklist.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
-            checklist.setReasonNotChecked(request.getReasonNotChecked());
-            checklist.setDateSupervisorChecked(new Date());
-            machine.setCheckStatus("รอผู้จัดการฝ่ายตรวจสอบ");
+            if (machine.getManagerId() == null) {
+                checklist.setChecklistStatus("ดำเนินการเสร็จสิ้น");
+                checklist.setReasonNotChecked(request.getReasonNotChecked());
+                checklist.setDateSupervisorChecked(new Date());
+                machine.setCheckStatus("ดำเนินการเสร็จสิ้น");
+            } else {
+                checklist.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
+                checklist.setReasonNotChecked(request.getReasonNotChecked());
+                checklist.setDateSupervisorChecked(new Date());
+                machine.setCheckStatus("รอผู้จัดการฝ่ายตรวจสอบ");
+            }
         } else if ("รอผู้จัดการฝ่ายตรวจสอบ".equals(checklist.getChecklistStatus())) {
             checklist.setChecklistStatus("ดำเนินการเสร็จสิ้น");
             checklist.setReasonNotChecked(request.getReasonNotChecked());
