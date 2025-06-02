@@ -96,8 +96,7 @@ public class ChecklistRecordsService {
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
 
-            LocalDate today = LocalDate.now(ZoneId.systemDefault());
-            if (today.getDayOfWeek() == DayOfWeek.FRIDAY && Objects.equals(responsibleId, record.getUserId())) {
+            if (Objects.equals(responsibleId, record.getUserId())) {
                 if(machine.getSupervisorId() != null) {
                     record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
                 }else {
