@@ -49,7 +49,6 @@ public class MachineService {
         String department = user.getDepartment();
         if (department != null && department.length() >= 2) {
             department = department.substring(0, 2);
-            System.out.println(department);
         } else {
             throw new RuntimeException("Invalid department for user ID: " + personId);
         }

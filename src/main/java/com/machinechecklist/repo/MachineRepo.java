@@ -3,6 +3,7 @@ package com.machinechecklist.repo;
 import com.machinechecklist.model.Machine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,7 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface MachineRepo extends JpaRepository<Machine, Long> {
-    List<Machine> findByDepartment(String department);
+    @Query("SELECT m FROM Machine m WHERE SUBSTRING(m.department, 1, 2) = :department")
+    List<Machine> findByDepartment(@Param("department") String department);
 
     List<Machine> findByResponsiblePersonId(String responsiblePersonId);
 
