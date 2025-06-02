@@ -21,7 +21,7 @@ public interface MachineChecklistRepo extends JpaRepository<MachineChecklist, Lo
     List<MachineChecklist> findByMachineCodeAndResetTime(String machineCode, String s, Sort id);
 
     default List<MachineChecklist> findByMachineCodeAndResetTime(String machineCode) {
-        return findByMachineCodeAndResetTime(machineCode, "0 0 0 * * MON", Sort.by(Sort.Direction.ASC, "id"));
+        return findByMachineCodeAndResetTime(machineCode, "0 0 0 * * 1", Sort.by(Sort.Direction.ASC, "id"));
     }
 
     @Modifying
