@@ -6,7 +6,9 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.machinechecklist.model.Machine;
+import com.machinechecklist.model.User;
 import com.machinechecklist.repo.MachineRepo;
+import com.machinechecklist.repo.UserRepo;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -34,9 +36,18 @@ public class MachineService {
 
     private final FileStorageService fileStorageService;
     private final MachineRepo machineRepo;
+    private final UserRepo userRepo;
 
     public List<Machine> getAllMachines() {
         return machineRepo.findAll();
+    }
+
+    public List<Machine> getMachinesByDepartment(String personId) {
+        User user = userRepo.findByUsername(personId)
+                .orElseThrow(() -> new RuntimeException("User not found for ID: " + personId));
+
+        String department = user.getDepartment();
+        return machineRepo.findByDepartment(department);
     }
 
     public List<Machine> getMachinesByResponsiblePerson(String personId) {

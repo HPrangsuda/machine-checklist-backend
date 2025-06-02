@@ -25,7 +25,6 @@ public class MachineController {
     private final FileStorageService fileStorageService;
 
     @GetMapping
-    //@PreAuthorize("hasRole('ADMIN')")
     public List<Machine> getAllMachines() {
         return machineService.getAllMachines();
     }
@@ -36,8 +35,13 @@ public class MachineController {
         return ResponseEntity.ok(machines);
     }
 
+    @GetMapping("/department/{personId}")
+    public ResponseEntity<List<Machine>> getMachinesByDepartment(@PathVariable String personId) {
+        List<Machine> machines = machineService.getMachinesByDepartment(personId);
+        return ResponseEntity.ok(machines);
+    }
+
     @GetMapping("/responsible-all/{personId}")
-    //@PreAuthorize("hasRole('SUPERVISOR')")
     public ResponseEntity<List<Machine>> getMachinesByResponsibleAll(@PathVariable String personId) {
         List<Machine> machines = machineService.getMachinesByResponsibleAll(personId);
         return ResponseEntity.ok(machines);
@@ -109,7 +113,6 @@ public class MachineController {
     }
 
     @DeleteMapping("/{id}")
-    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMachine(@PathVariable Long id) {
         machineService.deleteMachine(id);
         return ResponseEntity.noContent().build();
