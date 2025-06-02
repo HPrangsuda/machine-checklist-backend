@@ -47,6 +47,12 @@ public class MachineService {
                 .orElseThrow(() -> new RuntimeException("User not found for ID: " + personId));
 
         String department = user.getDepartment();
+        if (department != null && department.length() >= 2) {
+            department = department.substring(0, 2);
+        } else {
+            throw new RuntimeException("Invalid department for user ID: " + personId);
+        }
+
         return machineRepo.findByDepartment(department);
     }
 
