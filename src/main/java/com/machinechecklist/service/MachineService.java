@@ -135,7 +135,7 @@ public class MachineService {
             throw new IllegalStateException("Machine code already exists");
         }
 
-        machine.setCheckStatus("false");
+        machine.setCheckStatus("รอดำเนินการ");
 
         String qrCodeJson = String.format("{\"status\": true, \"code\": \"%s\"}",
                 machine.getMachineCode());
