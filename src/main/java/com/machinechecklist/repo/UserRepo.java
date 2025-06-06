@@ -13,6 +13,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
     Optional<User> findByUsername(String username);
 
-    @Query("SELECT u FROM User u WHERE u.role != 'SUPERADMIN' ORDER BY u.username ASC")
+    @Query("SELECT u FROM User u WHERE u.role != 'SUPERADMIN' ORDER BY u.firstName ASC")
     List<User> findAllNonSuperAdminUsers();
 }
