@@ -5,8 +5,10 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.machinechecklist.model.Kpi;
 import com.machinechecklist.model.Machine;
 import com.machinechecklist.model.User;
+import com.machinechecklist.repo.KpiRepo;
 import com.machinechecklist.repo.MachineRepo;
 import com.machinechecklist.repo.UserRepo;
 import lombok.Getter;
@@ -26,6 +28,8 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.List;
 
@@ -37,6 +41,7 @@ public class MachineService {
     private final FileStorageService fileStorageService;
     private final MachineRepo machineRepo;
     private final UserRepo userRepo;
+    private final KpiRepo kpiRepo;
 
     public List<Machine> getAllMachines() {
         return machineRepo.findAll();
@@ -147,7 +152,13 @@ public class MachineService {
             machine.setImage(filename);
         }
 
-        return machineRepo.save(machine);
+        Machine savedMachine = machineRepo.save(machine);
+
+        if (savedMachine.getResponsiblePersonId() != null) {
+            updateOrCreateKpi(savedMachine.getResponsiblePersonId());
+        }
+
+        return savedMachine;
     }
 
     public byte[] exportMachinesToExcel() throws IOException, WriterException {
@@ -282,6 +293,7 @@ public class MachineService {
         Optional<Machine> existingMachine = machineRepo.findById(id);
         if (existingMachine.isPresent()) {
             Machine machine = existingMachine.get();
+            String oldResponsiblePersonId = machine.getResponsiblePersonId(); // เก็บ ID เดิม
 
             machine.setResponsiblePersonId(updatedMachine.getResponsiblePersonId());
             machine.setResponsiblePersonName(updatedMachine.getResponsiblePersonName());
@@ -291,7 +303,17 @@ public class MachineService {
             machine.setManagerName(updatedMachine.getManagerName());
             machine.setMachineStatus(updatedMachine.getMachineStatus());
 
-            return machineRepo.save(machine);
+            Machine savedMachine = machineRepo.save(machine);
+
+            // อัปเดต KPI สำหรับ responsiblePersonId เดิมและใหม่ (ถ้าเปลี่ยน)
+            if (oldResponsiblePersonId != null) {
+                updateOrCreateKpi(oldResponsiblePersonId);
+            }
+            if (savedMachine.getResponsiblePersonId() != null) {
+                updateOrCreateKpi(savedMachine.getResponsiblePersonId());
+            }
+
+            return savedMachine;
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
         }
@@ -303,5 +325,47 @@ public class MachineService {
         } else {
             throw new RuntimeException("Machine not found with id: " + id);
         }
+    }
+
+    private void updateOrCreateKpi(String responsiblePersonId) {
+        LocalDate currentDate = LocalDate.now();
+        String year = String.valueOf(currentDate.getYear());
+        String month = String.format("%02d", currentDate.getMonthValue());
+
+        long machineCount = machineRepo.countByResponsiblePersonId(responsiblePersonId);
+
+        YearMonth yearMonth = YearMonth.of(currentDate.getYear(), currentDate.getMonth());
+        int fridays = countFridaysInMonth(yearMonth);
+
+        Optional<Kpi> existingKpi = kpiRepo.findByEmployeeIdAndYearAndMonth(responsiblePersonId, year, month);
+        Kpi kpi;
+        if (existingKpi.isPresent()) {
+            kpi = existingKpi.get();
+            kpi.setCheckAll(fridays * machineCount);
+        } else {
+            kpi = new Kpi();
+            kpi.setEmployeeId(responsiblePersonId);
+            kpi.setYear(year);
+            kpi.setMonth(month);
+            kpi.setCheckAll(fridays * machineCount);
+            kpi.setChecked(0L);
+        }
+
+        kpiRepo.save(kpi);
+    }
+
+    private int countFridaysInMonth(YearMonth yearMonth) {
+        LocalDate firstDay = yearMonth.atDay(1);
+        LocalDate lastDay = yearMonth.atEndOfMonth();
+        int fridays = 0;
+
+        LocalDate date = firstDay;
+        while (!date.isAfter(lastDay)) {
+            if (date.getDayOfWeek().getValue() == 5) { // Friday
+                fridays++;
+            }
+            date = date.plusDays(1);
+        }
+        return fridays;
     }
 }
