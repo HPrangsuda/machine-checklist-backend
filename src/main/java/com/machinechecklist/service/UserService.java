@@ -20,7 +20,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public List<User> getAllUser() {
-        return userRepo.findAll();
+        return userRepo.findAllNonSuperAdminUsers();
     }
 
     @PostConstruct
