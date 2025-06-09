@@ -1,7 +1,9 @@
 package com.machinechecklist.service;
 
+import com.machinechecklist.model.Machine;
 import com.machinechecklist.model.MachineChecklist;
 import com.machinechecklist.repo.MachineChecklistRepo;
+import com.machinechecklist.repo.MachineRepo;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ public class MachineChecklistResetService {
     private static final Logger logger = LoggerFactory.getLogger(MachineChecklistResetService.class);
 
     private final MachineChecklistRepo checklistRepo;
+    private final MachineRepo machineRepo;
     private final TaskScheduler taskScheduler;
 
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
@@ -85,9 +88,25 @@ public class MachineChecklistResetService {
     private void resetCheckStatus(Long checklistId) {
         MachineChecklist checklist = checklistRepo.findById(checklistId).orElse(null);
         if (checklist != null) {
+            // Update MachineChecklist checkStatus
             checklist.setCheckStatus(false);
             checklistRepo.save(checklist);
             logger.debug("Reset check status for checklist ID {}", checklistId);
+
+            // Update Machine checkStatus based on machineCode
+            String machineCode = checklist.getMachineCode();
+            if (machineCode != null && !machineCode.isEmpty()) {
+                Machine machine = machineRepo.findByMachineCode(machineCode).orElse(null);
+                if (machine != null) {
+                    machine.setCheckStatus("รอดำเนินการ");
+                    machineRepo.save(machine);
+                    logger.debug("Reset check status for machine with machineCode {}", machineCode);
+                } else {
+                    logger.warn("Machine with machineCode {} not found during reset", machineCode);
+                }
+            } else {
+                logger.warn("No machineCode specified for checklist ID {}", checklistId);
+            }
         } else {
             logger.warn("Checklist ID {} not found during reset", checklistId);
         }

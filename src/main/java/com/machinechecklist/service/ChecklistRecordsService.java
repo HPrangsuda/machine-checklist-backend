@@ -14,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -96,29 +94,17 @@ public class ChecklistRecordsService {
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
 
-            if (Objects.equals(responsibleId, record.getUserId())) {
-                if(machine.getSupervisorId() != null) {
+            if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus())) {
+                if (machine.getSupervisorId() != null) {
                     record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
-                }else {
+                } else {
                     record.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
                 }
                 record.setRecheck(true);
-            } else {
-                record.setChecklistStatus("ดำเนินการเสร็จสิ้น");
-                record.setRecheck(false);
-            }
 
-            ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
-
-            machine.setMachineStatus(savedRecord.getMachineStatus());
-            machine.setCheckStatus(savedRecord.getChecklistStatus());
-            machineRepo.save(machine);
-
-            if (Objects.equals(responsibleId, record.getUserId())) {
-                //update checkStatus
+                // Update checkStatus in machineChecklist
                 for (ChecklistItemDTO item : request.getChecklistItems()) {
                     if (item.getId() != null) {
-
                         MachineChecklist checklist = machineChecklistRepo.findById(item.getId())
                                 .orElseThrow(() -> new RuntimeException("Checklist item not found with id: " + item.getId()));
                         checklist.setCheckStatus(true);
@@ -128,7 +114,7 @@ public class ChecklistRecordsService {
                     }
                 }
 
-                //KPI
+                // KPI
                 LocalDate currentDate = LocalDate.now();
                 String year = String.valueOf(currentDate.getYear());
                 String month = String.format("%02d", currentDate.getMonthValue());
@@ -140,7 +126,16 @@ public class ChecklistRecordsService {
                 } else {
                     throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
                 }
+            } else {
+                record.setChecklistStatus("ดำเนินการเสร็จสิ้น");
+                record.setRecheck(false);
             }
+
+            ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
+
+            machine.setMachineStatus(savedRecord.getMachineStatus());
+            machine.setCheckStatus(savedRecord.getChecklistStatus());
+            machineRepo.save(machine);
 
             return savedRecord;
         } catch (Exception e) {
