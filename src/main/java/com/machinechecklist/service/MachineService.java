@@ -337,11 +337,16 @@ public class MachineService {
         YearMonth yearMonth = YearMonth.of(currentDate.getYear(), currentDate.getMonth());
         int fridays = countFridaysInMonth(yearMonth);
 
+        User user = userRepo.findByUsername(responsiblePersonId)
+                .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
+        String employeeName = user.getFirstName() + " " + user.getLastName();
+
         Optional<Kpi> existingKpi = kpiRepo.findByEmployeeIdAndYearAndMonth(responsiblePersonId, year, month);
         Kpi kpi;
         if (existingKpi.isPresent()) {
             kpi = existingKpi.get();
             kpi.setCheckAll(fridays * machineCount);
+            kpi.setEmployeeName(employeeName);
         } else {
             kpi = new Kpi();
             kpi.setEmployeeId(responsiblePersonId);
@@ -349,6 +354,7 @@ public class MachineService {
             kpi.setMonth(month);
             kpi.setCheckAll(fridays * machineCount);
             kpi.setChecked(0L);
+            kpi.setEmployeeName(employeeName);
         }
 
         kpiRepo.save(kpi);

@@ -2,8 +2,10 @@ package com.machinechecklist.service;
 
 import com.machinechecklist.model.Kpi;
 import com.machinechecklist.model.Machine;
+import com.machinechecklist.model.User;
 import com.machinechecklist.repo.KpiRepo;
 import com.machinechecklist.repo.MachineRepo;
+import com.machinechecklist.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KpiScheduler {
     private final MachineRepo machineRepo;
+    private final UserRepo userRepo;
     private final KpiRepo kpiRepo;
 
     @Scheduled(cron = "0 1 0 1 * ?")
@@ -39,7 +42,7 @@ public class KpiScheduler {
                         Collectors.counting()
                 ));
 
-        // Create Kpi record for each responsiblePersonId
+        // Create Kpi record
         machineCountByResponsiblePerson.forEach((responsiblePersonId, machineCount) -> {
             Kpi kpi = new Kpi();
             kpi.setEmployeeId(responsiblePersonId);
@@ -47,6 +50,12 @@ public class KpiScheduler {
             kpi.setMonth(month);
             kpi.setCheckAll(fridays * machineCount);
             kpi.setChecked(0L);
+
+            User user = userRepo.findByUsername(responsiblePersonId)
+                    .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
+
+            String employeeName = user.getFirstName() + " " + user.getLastName();
+            kpi.setEmployeeName(employeeName);
 
             kpiRepo.save(kpi);
         });

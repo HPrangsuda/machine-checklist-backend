@@ -8,5 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface KpiRepo extends JpaRepository<Kpi, Long> {
+    Optional<Kpi> findByYearAndMonth(String year, String month);
+
     Optional<Kpi> findByEmployeeIdAndYearAndMonth(String employeeId, String year, String month);
 }

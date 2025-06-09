@@ -12,6 +12,18 @@ import org.springframework.web.bind.annotation.*;
 public class KpiController {
     private final KpiService kpiService;
 
+    @GetMapping
+    public ResponseEntity<Kpi> getKpiAll(
+            @RequestParam String year,
+            @RequestParam String month) {
+        try {
+            Kpi kpi = kpiService.getKpiByYearAndMonth(year, month);
+            return ResponseEntity.ok(kpi);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
     @GetMapping("/{employeeId}")
     public ResponseEntity<Kpi> getKpi(
             @PathVariable String employeeId,
