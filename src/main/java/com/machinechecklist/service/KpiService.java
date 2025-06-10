@@ -5,6 +5,7 @@ import com.machinechecklist.repo.KpiRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -13,9 +14,8 @@ public class KpiService {
 
     private final KpiRepo kpiRepo;
 
-    public Kpi getKpiByYearAndMonth(String year, String month) {
-        Optional<Kpi> kpiOptional = kpiRepo.findByYearAndMonth(year, month);
-        return kpiOptional.orElseThrow(() -> new RuntimeException("ไม่พบข้อมูล KPI ปี: " + year + ", เดือน: " + month));
+    public List<Kpi> getKpiByYearAndMonth(String year, String month) {
+        return kpiRepo.findByYearAndMonth(year, month);
     }
 
     public Kpi getKpiByEmployeeIdAndYearAndMonth(String employeeId, String year, String month) {

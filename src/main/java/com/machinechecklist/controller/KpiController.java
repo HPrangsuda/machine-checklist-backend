@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/kpi")
 @RequiredArgsConstructor
@@ -13,12 +15,12 @@ public class KpiController {
     private final KpiService kpiService;
 
     @GetMapping
-    public ResponseEntity<Kpi> getKpiAll(
+    public ResponseEntity<List<Kpi>> getKpiAll(
             @RequestParam String year,
             @RequestParam String month) {
         try {
-            Kpi kpi = kpiService.getKpiByYearAndMonth(year, month);
-            return ResponseEntity.ok(kpi);
+            List<Kpi> kpis = kpiService.getKpiByYearAndMonth(year, month);
+            return ResponseEntity.ok(kpis);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }
