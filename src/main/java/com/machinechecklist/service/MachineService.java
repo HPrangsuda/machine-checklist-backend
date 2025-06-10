@@ -294,7 +294,7 @@ public class MachineService {
         if (existingMachine.isPresent()) {
             Machine machine = existingMachine.get();
             String oldResponsiblePersonId = machine.getResponsiblePersonId(); // เก็บ ID เดิม
-
+            machine.setDepartment(updatedMachine.getDepartment());
             machine.setResponsiblePersonId(updatedMachine.getResponsiblePersonId());
             machine.setResponsiblePersonName(updatedMachine.getResponsiblePersonName());
             machine.setSupervisorId(updatedMachine.getSupervisorId());
