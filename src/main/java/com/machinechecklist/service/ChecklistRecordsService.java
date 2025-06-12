@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +95,7 @@ public class ChecklistRecordsService {
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
 
-            if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus())) {
+            if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus()) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                 if (machine.getSupervisorId() != null) {
                     record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
                 } else {
