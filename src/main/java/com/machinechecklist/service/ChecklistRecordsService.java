@@ -126,6 +126,8 @@ public class ChecklistRecordsService {
                 } else {
                     throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
                 }
+
+                machine.setCheckStatus(record.getChecklistStatus());
             } else {
                 record.setChecklistStatus("ดำเนินการเสร็จสิ้น");
                 record.setRecheck(false);
@@ -134,7 +136,6 @@ public class ChecklistRecordsService {
             ChecklistRecords savedRecord = checklistRecordsRepo.save(record);
 
             machine.setMachineStatus(savedRecord.getMachineStatus());
-            machine.setCheckStatus(savedRecord.getChecklistStatus());
             machineRepo.save(machine);
 
             return savedRecord;
