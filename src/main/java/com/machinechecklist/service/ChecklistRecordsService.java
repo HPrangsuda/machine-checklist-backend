@@ -47,7 +47,7 @@ public class ChecklistRecordsService {
 
             Machine machine = machineRepo.findByMachineCode(record.getMachineCode())
                     .orElseThrow(() -> new RuntimeException("Machine not found with code: " + record.getMachineCode()));
-            machine.setCheckStatus(currentStatus + "-เกินกำหนด");
+            machine.setCheckStatus("รอดำเนินการ");
             machineRepo.save(machine);
         }
     }
