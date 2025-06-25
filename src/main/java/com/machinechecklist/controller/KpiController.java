@@ -26,6 +26,19 @@ public class KpiController {
         }
     }
 
+    @GetMapping("/responsible/{employeeId}")
+    public ResponseEntity<Kpi> getKpiResponsible(
+            @PathVariable String employeeId,
+            @RequestParam String year,
+            @RequestParam String month) {
+        try {
+            Kpi kpi = kpiService.getKpiByEmployeeIdAndYearAndMonth(employeeId, year, month);
+            return ResponseEntity.ok(kpi);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
     @GetMapping("/{employeeId}")
     public ResponseEntity<Kpi> getKpi(
             @PathVariable String employeeId,

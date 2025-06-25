@@ -20,4 +20,5 @@ public class Kpi {
     private String month;
     private Long checkAll;
     private Long checked;
+    private String managerId;
 }
