@@ -15,6 +15,9 @@ public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Lo
     @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON m.machineCode = cr.machineCode WHERE cr.userId = :personId ORDER BY cr.checklistId DESC")
     List<ChecklistRecords> findByUserId(@Param("personId") String personId);
 
+    @Query("SELECT cr FROM ChecklistRecords cr JOIN Machine m ON cr.machineCode = m.machineCode WHERE m.department = :department")
+    List<ChecklistRecords> findByMachineDepartment(@Param("department") String department);
+
     @Query("SELECT c FROM ChecklistRecords c WHERE " +
             "c.recheck = true AND " +
             "((c.checklistStatus = 'รอหัวหน้างานตรวจสอบ' AND c.supervisor = :personId) OR " +

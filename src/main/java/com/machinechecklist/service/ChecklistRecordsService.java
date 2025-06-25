@@ -2,11 +2,8 @@ package com.machinechecklist.service;
 
 import com.machinechecklist.dto.ChecklistItemDTO;
 import com.machinechecklist.model.*;
-import com.machinechecklist.repo.ChecklistRecordsRepo;
+import com.machinechecklist.repo.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.machinechecklist.repo.KpiRepo;
-import com.machinechecklist.repo.MachineChecklistRepo;
-import com.machinechecklist.repo.MachineRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,7 +28,7 @@ public class ChecklistRecordsService {
     private final MachineChecklistRepo machineChecklistRepo;
     private final KpiRepo kpiRepo;
     private final ObjectMapper objectMapper;
-
+    private final UserRepo userRepo;
 
     @Scheduled(cron = "0 1 0 * * MON")
     @Transactional
@@ -58,6 +55,13 @@ public class ChecklistRecordsService {
 
     public Optional<ChecklistRecords> getRecordById(Long id) {
         return checklistRecordsRepo.findById(id);
+    }
+
+    public List<ChecklistRecords> getChecklistRecordsByUserId(String personId) {
+        User user = userRepo.findByUsername(personId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String department = user.getDepartment();
+        return checklistRecordsRepo.findByMachineDepartment(department);
     }
 
     public List<ChecklistRecords> getRecordByResponsiblePerson(String personId) {
