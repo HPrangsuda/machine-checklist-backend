@@ -21,4 +21,5 @@ public class Kpi {
     private Long checkAll;
     private Long checked;
     private String managerId;
+    private String supervisorId;
 }

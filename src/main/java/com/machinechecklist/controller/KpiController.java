@@ -26,13 +26,26 @@ public class KpiController {
         }
     }
 
-    @GetMapping("/responsible/{employeeId}")
-    public ResponseEntity<List<Kpi>> getKpiAll(
+    @GetMapping("/manager/{employeeId}")
+    public ResponseEntity<List<Kpi>> getResponsibleByManagerId(
             @PathVariable String employeeId,
             @RequestParam String year,
             @RequestParam String month) {
         try {
             List<Kpi> kpis = kpiService.getKpiByManagerIdAndYearAndMonth(employeeId, year, month);
+            return ResponseEntity.ok(kpis);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/supervisor/{employeeId}")
+    public ResponseEntity<List<Kpi>> getResponsibleBySupervisorId(
+            @PathVariable String employeeId,
+            @RequestParam String year,
+            @RequestParam String month) {
+        try {
+            List<Kpi> kpis = kpiService.getKpiBySupervisorIdAndYearAndMonth(employeeId, year, month);
             return ResponseEntity.ok(kpis);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);

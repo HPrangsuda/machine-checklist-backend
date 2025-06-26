@@ -341,10 +341,13 @@ public class MachineService {
                 .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
         String employeeName = user.getFirstName() + " " + user.getLastName();
 
-        // Fetch manager_id from machine table
+        // Fetch manager_id and supervisor_id from machine table
         Optional<Machine> machine = machineRepo.findFirstByResponsiblePersonId(responsiblePersonId);
-        String managerId = machine.map(Machine::getManagerId)
-                .orElseThrow(() -> new RuntimeException("No machine found for responsiblePersonId: " + responsiblePersonId));
+        if (machine.isEmpty()) {
+            throw new RuntimeException("No machine found for responsiblePersonId: " + responsiblePersonId);
+        }
+        String managerId = machine.get().getManagerId();
+        String supervisorId = machine.get().getSupervisorId();
 
         Optional<Kpi> existingKpi = kpiRepo.findByEmployeeIdAndYearAndMonth(responsiblePersonId, year, month);
         Kpi kpi;
@@ -353,6 +356,7 @@ public class MachineService {
             kpi.setCheckAll(fridays * machineCount);
             kpi.setEmployeeName(employeeName);
             kpi.setManagerId(managerId);
+            kpi.setSupervisorId(supervisorId);
         } else {
             kpi = new Kpi();
             kpi.setEmployeeId(responsiblePersonId);
@@ -362,6 +366,7 @@ public class MachineService {
             kpi.setChecked(0L);
             kpi.setEmployeeName(employeeName);
             kpi.setManagerId(managerId);
+            kpi.setSupervisorId(supervisorId);
         }
 
         kpiRepo.save(kpi);

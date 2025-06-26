@@ -22,6 +22,10 @@ public class KpiService {
         return kpiRepo.findByManagerIdAndYearAndMonth(managerId, year, month);
     }
 
+    public List<Kpi> getKpiBySupervisorIdAndYearAndMonth(String supervisorId, String year, String month) {
+        return kpiRepo.findBySupervisorIdAndYearAndMonth(supervisorId, year, month);
+    }
+
     public Kpi getKpiByEmployeeIdAndYearAndMonth(String employeeId, String year, String month) {
         Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(employeeId, year, month);
         return kpiOptional.orElseThrow(() -> new RuntimeException("ไม่พบข้อมูล KPI สำหรับ employeeId: " + employeeId + ", ปี: " + year + ", เดือน: " + month));
