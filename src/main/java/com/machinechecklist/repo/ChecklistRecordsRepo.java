@@ -30,6 +30,6 @@ public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Lo
     List<ChecklistRecords> findByMachineCodeAndUserIdAndDateCreatedBetween(
             String machineCode, String userId, Date start, Date end);
 
-    @Query("SELECT COUNT(c) FROM ChecklistRecords c WHERE c.userId = :userId AND c.dateCreated BETWEEN :startDate AND :endDate AND  :recheck=true AND (c.reasonNotChecked NOT IN ('ไม่ได้ดำเนินการ', 'ผู้รับผิดชอบไม่ดำเนินการ') OR c.reasonNotChecked IS NULL)")
+    @Query("SELECT COUNT(c) FROM ChecklistRecords c WHERE c.userId = :userId AND c.dateCreated BETWEEN :startDate AND :endDate AND c.recheck = true AND (c.reasonNotChecked NOT IN ('ไม่ได้ดำเนินการ', 'ผู้รับผิดชอบไม่ดำเนินการ') OR c.reasonNotChecked IS NULL)")
     long countByUserIdAndDateRangeAndReasonNotChecked(@Param("userId") String userId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }
