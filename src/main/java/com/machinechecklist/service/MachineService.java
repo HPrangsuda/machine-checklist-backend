@@ -359,7 +359,11 @@ public class MachineService {
             LocalDate firstMonday = getFirstMondayOfWeekContainingFirstDay(yearMonth);
             LocalDate lastFriday = getLastFridayOfMonth(yearMonth);
             // Count checklist records for the update where userId = employeeId and reason_not_checked condition
-            long checkedCount = 5;
+            long checkedCount = checklistRecordsRepo.countByUserIdAndDateRangeAndReasonNotChecked(
+                    responsiblePersonId, // userId in checklist_record = employeeId in Kpi
+                    firstMonday.atStartOfDay(),
+                    lastFriday.atTime(23, 59, 59)
+            );
             kpi.setCheckAll(fridays * machineCount);
             kpi.setChecked(checkedCount); // Update with sum from checklist_record
             kpi.setEmployeeName(employeeName);
