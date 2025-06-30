@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -28,4 +29,7 @@ public interface ChecklistRecordsRepo extends JpaRepository<ChecklistRecords, Lo
 
     List<ChecklistRecords> findByMachineCodeAndUserIdAndDateCreatedBetween(
             String machineCode, String userId, Date start, Date end);
+
+    @Query("SELECT COUNT(c) FROM ChecklistRecords c WHERE c.userId = :userId AND c.dateCreated BETWEEN :startDate AND :endDate AND c.reasonNotChecked NOT IN ('ไม่ได้ดำเนินการ', 'ผู้รับผิดชอบไม่ดำเนินการ')")
+    long countByUserIdAndDateRangeAndReasonNotChecked(@Param("userId") String userId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }
