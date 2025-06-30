@@ -397,7 +397,6 @@ public class MachineService {
             date = date.plusDays(1);
         }
         return fridays;
-
     }
 
     private LocalDate getFirstMondayOfWeekContainingFirstDay(YearMonth yearMonth) {
