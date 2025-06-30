@@ -382,7 +382,6 @@ public class MachineService {
         }
 
         kpiRepo.save(kpi);
-
     }
 
     private int countFridaysInMonth(YearMonth yearMonth) {
