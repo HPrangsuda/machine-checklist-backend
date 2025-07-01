@@ -305,16 +305,16 @@ public class MachineService {
 
             Machine savedMachine = machineRepo.save(machine);
 
-            LocalDate currentDate = LocalDate.now();
-            String year = String.valueOf(currentDate.getYear());
-            String month = String.format("%02d", currentDate.getMonthValue());
-
-            if (oldResponsiblePersonId != null) {
-                kpiService.updateOrCreateKpi(oldResponsiblePersonId, year, month);
-            }
-            if (savedMachine.getResponsiblePersonId() != null) {
-                kpiService.updateOrCreateKpi(savedMachine.getResponsiblePersonId(), year, month);
-            }
+//            LocalDate currentDate = LocalDate.now();
+//            String year = String.valueOf(currentDate.getYear());
+//            String month = String.format("%02d", currentDate.getMonthValue());
+//
+//            if (oldResponsiblePersonId != null) {
+//                kpiService.updateOrCreateKpi(oldResponsiblePersonId, year, month);
+//            }
+//            if (savedMachine.getResponsiblePersonId() != null) {
+//                kpiService.updateOrCreateKpi(savedMachine.getResponsiblePersonId(), year, month);
+//            }
 
             return savedMachine;
         } else {
