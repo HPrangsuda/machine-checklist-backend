@@ -42,7 +42,6 @@ public class KpiService {
     }
 
     public void updateOrCreateKpi(String responsiblePersonId, String year, String month) {
-        System.out.println("hellloooo");
         long machineCount = machineRepo.countByResponsiblePersonId(responsiblePersonId);
 
         YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
