@@ -42,6 +42,7 @@ public class KpiService {
     }
 
     public void updateOrCreateKpi(String responsiblePersonId, String year, String month) {
+        System.out.println("hellloooo");
         long machineCount = machineRepo.countByResponsiblePersonId(responsiblePersonId);
 
         YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
@@ -68,7 +69,7 @@ public class KpiService {
             LocalDate lastFriday = getLastFridayOfMonth(yearMonth);
             // Count checklist records for the update where userId = employeeId and reason_not_checked condition
             long checkedCount = checklistRecordsRepo.countByUserIdAndDateRangeAndReasonNotChecked(
-                    responsiblePersonId, // userId in checklist_record = employeeId in Kpi
+                    responsiblePersonId,
                     firstMonday.atStartOfDay(),
                     lastFriday.atTime(23, 59, 59)
             );
