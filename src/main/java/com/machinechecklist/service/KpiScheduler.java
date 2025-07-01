@@ -29,11 +29,9 @@ public class KpiScheduler {
         String year = String.valueOf(currentDate.getYear());
         String month = String.format("%02d", currentDate.getMonthValue());
 
-        // Calculate number of Fridays in the current month
         YearMonth yearMonth = YearMonth.of(currentDate.getYear(), currentDate.getMonth());
         int fridays = countFridaysInMonth(yearMonth);
 
-        // Group machines by responsiblePersonId
         List<Machine> machines = machineRepo.findAll();
         Map<String, Long> machineCountByResponsiblePerson = machines.stream()
                 .filter(machine -> machine.getResponsiblePersonId() != null)
@@ -42,7 +40,6 @@ public class KpiScheduler {
                         Collectors.counting()
                 ));
 
-        // Create Kpi record
         machineCountByResponsiblePerson.forEach((responsiblePersonId, machineCount) -> {
             Kpi kpi = new Kpi();
             kpi.setEmployeeId(responsiblePersonId);
@@ -56,6 +53,17 @@ public class KpiScheduler {
 
             String employeeName = user.getFirstName() + " " + user.getLastName();
             kpi.setEmployeeName(employeeName);
+
+            Machine machine = machines.stream()
+                    .filter(m -> responsiblePersonId.equals(m.getResponsiblePersonId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("No machine found for responsible person: " + responsiblePersonId));
+
+            String managerId = machine.getManagerId();
+            kpi.setManagerId(managerId);
+
+            String supervisorId = machine.getSupervisorId();
+            kpi.setSupervisorId(supervisorId);
 
             kpiRepo.save(kpi);
         });

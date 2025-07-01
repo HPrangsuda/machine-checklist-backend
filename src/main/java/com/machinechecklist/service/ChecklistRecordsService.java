@@ -26,9 +26,9 @@ public class ChecklistRecordsService {
     private final ChecklistRecordsRepo checklistRecordsRepo;
     private final MachineRepo machineRepo;
     private final MachineChecklistRepo machineChecklistRepo;
-    private final KpiRepo kpiRepo;
     private final ObjectMapper objectMapper;
     private final UserRepo userRepo;
+    private final KpiService kpiService;
 
     @Scheduled(cron = "0 1 0 * * MON")
     @Transactional
@@ -122,15 +122,8 @@ public class ChecklistRecordsService {
                 // KPI
                 LocalDate currentDate = LocalDate.now();
                 String year = String.valueOf(currentDate.getYear());
-                String month = String.format("%02d", currentDate.getMonthValue());
-                Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
-                if (kpiOptional.isPresent()) {
-                    Kpi kpi = kpiOptional.get();
-                    kpi.setChecked(kpi.getChecked() + 1);
-                    kpiRepo.save(kpi);
-                } else {
-                    throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
-                }
+                String monthStr = String.format("%02d", currentDate.getMonthValue());
+                kpiService.updateOrCreateKpi(responsibleId, year, monthStr);
 
                 machine.setCheckStatus(record.getChecklistStatus());
             } else {
@@ -182,15 +175,8 @@ public class ChecklistRecordsService {
 
         if (reasonNotChecked != null && !reasonNotChecked.isEmpty() && !reasonNotChecked.equals("ผู้รับผิดชอบไม่ดำเนินการ")) {
             String year = new SimpleDateFormat("yyyy").format(checklist.getDateCreated());
-            String month = new SimpleDateFormat("MM").format(checklist.getDateCreated());
-            Optional<Kpi> kpiOptional = kpiRepo.findByEmployeeIdAndYearAndMonth(responsibleId, year, month);
-            if (kpiOptional.isPresent()) {
-                Kpi kpi = kpiOptional.get();
-                kpi.setChecked(kpi.getChecked() + 1);
-                kpiRepo.save(kpi);
-            } else {
-                throw new RuntimeException("Kpi record not found for employeeId: " + responsibleId + ", year: " + year + ", month: " + month);
-            }
+            String monthStr = new SimpleDateFormat("MM").format(checklist.getDateCreated());
+            kpiService.updateOrCreateKpi(responsibleId, year, monthStr);
         }
 
         machineRepo.save(machine);
