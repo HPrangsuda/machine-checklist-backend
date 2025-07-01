@@ -86,7 +86,7 @@ public class ChecklistRecordsService {
             String checklistJson = objectMapper.writeValueAsString(request.getChecklistItems());
             record.setMachineChecklist(checklistJson);
 
-            record.setMachineNote(request.getNote());
+            record.setMachineNote(request.getMachineNote());
 
             if (file != null) {
                 String fileName = fileStorageService.storeFile(file);
@@ -98,6 +98,7 @@ public class ChecklistRecordsService {
             record.setSupervisor(request.getSupervisor());
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
+            record.setJobDetails(request.getJobDetails());
 
             if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus()) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                 if (machine.getSupervisorId() != null) {

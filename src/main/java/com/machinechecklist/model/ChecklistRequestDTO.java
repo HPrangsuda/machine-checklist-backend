@@ -13,11 +13,12 @@ public class ChecklistRequestDTO {
     private String machineName;
     private String machineStatus;
     private List<ChecklistItemDTO> checklistItems;
-    private String note;
+    private String machineNote;
     private String machineImage;
     private String userId;
     private String userName;
     private String supervisor;
     private String manager;
     private String reasonNotChecked;
+    private String jobDetails;
 }

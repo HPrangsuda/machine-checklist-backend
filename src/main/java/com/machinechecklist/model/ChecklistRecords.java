@@ -43,4 +43,5 @@ public class ChecklistRecords {
 
     private String checklistStatus;
     private String reasonNotChecked;
+    private String jobDetails;
 }
