@@ -246,41 +246,41 @@ public class ChecklistRecordsService {
             Row row = sheet.createRow(rowNum++);
 
             row.createCell(0).setCellValue(Optional.ofNullable(record.getChecklistId()).map(String::valueOf).orElse(""));
-            row.createCell(2).setCellValue(Optional.ofNullable(record.getMachineCode()).orElse(""));
-            row.createCell(3).setCellValue(Optional.ofNullable(record.getMachineName()).orElse(""));
-            row.createCell(1).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
+            row.createCell(1).setCellValue(Optional.ofNullable(record.getMachineCode()).orElse(""));
+            row.createCell(2).setCellValue(Optional.ofNullable(record.getMachineName()).orElse(""));
+            row.createCell(3).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
             row.createCell(4).setCellValue(Optional.ofNullable(record.getMachineStatus()).orElse(""));
-            row.createCell(15).setCellValue(Optional.ofNullable(record.getChecklistStatus()).orElse(""));
-            row.createCell(8).setCellValue(Optional.ofNullable(record.getUserId()).orElse(""));
-            row.createCell(9).setCellValue(Optional.ofNullable(record.getUserName()).orElse(""));
+            row.createCell(5).setCellValue(Optional.ofNullable(record.getChecklistStatus()).orElse(""));
+            row.createCell(6).setCellValue(Optional.ofNullable(record.getUserId()).orElse(""));
+            row.createCell(7).setCellValue(Optional.ofNullable(record.getUserName()).orElse(""));
 
-            Cell dateCreatedCell = row.createCell(10);
+            Cell dateCreatedCell = row.createCell(8);
             if (record.getDateCreated() != null) {
                 dateCreatedCell.setCellValue(record.getDateCreated());
                 dateCreatedCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(11).setCellValue(Optional.ofNullable(record.getSupervisor()).orElse(""));
+            row.createCell(9).setCellValue(Optional.ofNullable(record.getSupervisor()).orElse(""));
 
-            Cell dateSupervisorCell = row.createCell(12);
+            Cell dateSupervisorCell = row.createCell(10);
             if (record.getDateSupervisorChecked() != null) {
                 dateSupervisorCell.setCellValue(record.getDateSupervisorChecked());
                 dateSupervisorCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(13).setCellValue(Optional.ofNullable(record.getManager()).orElse(""));
+            row.createCell(11).setCellValue(Optional.ofNullable(record.getManager()).orElse(""));
 
-            Cell dateManagerCell = row.createCell(14);
+            Cell dateManagerCell = row.createCell(12);
             if (record.getDateManagerChecked() != null) {
                 dateManagerCell.setCellValue(record.getDateManagerChecked());
                 dateManagerCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(6).setCellValue(Optional.ofNullable(record.getMachineNote()).orElse(""));
-            row.createCell(7).setCellValue(Optional.ofNullable(record.getMachineImage()).orElse(""));
-            row.createCell(16).setCellValue(Optional.ofNullable(record.getReasonNotChecked()).orElse(""));
-            row.createCell(17).setCellValue(Optional.ofNullable(record.getJobDetails()).orElse(""));
-            row.createCell(5).setCellValue(Optional.ofNullable(record.getMachineChecklist()).orElse(""));
+            row.createCell(13).setCellValue(Optional.ofNullable(record.getMachineNote()).orElse(""));
+            row.createCell(14).setCellValue(Optional.ofNullable(record.getMachineImage()).orElse(""));
+            row.createCell(15).setCellValue(Optional.ofNullable(record.getReasonNotChecked()).orElse(""));
+            row.createCell(16).setCellValue(Optional.ofNullable(record.getJobDetails()).orElse(""));
+            row.createCell(17).setCellValue(Optional.ofNullable(record.getMachineChecklist()).orElse(""));
         }
 
         for (int i = 0; i < headers.length; i++) {
