@@ -247,7 +247,7 @@ public class ChecklistRecordsService {
             System.out.println("Processing record ID: " + record.getChecklistId()); // Debug log
             Row row = sheet.createRow(rowNum++);
 
-            row.createCell(0).setCellValue(Optional.ofNullable(record.getChecklistId()).orElse(Long.valueOf("")));
+            row.createCell(0).setCellValue(String.valueOf(record.getChecklistId() != null ? record.getChecklistId() : ""));
             row.createCell(1).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
             row.createCell(2).setCellValue(Optional.ofNullable(record.getMachineCode()).orElse(""));
             row.createCell(3).setCellValue(Optional.ofNullable(record.getMachineName()).orElse(""));
