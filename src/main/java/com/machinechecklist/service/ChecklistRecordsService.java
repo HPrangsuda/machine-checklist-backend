@@ -217,6 +217,7 @@ public class ChecklistRecordsService {
 
     public byte[] exportChecklistToExcel() throws IOException {
         List<ChecklistRecords> records = checklistRecordsRepo.findAll();
+
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Checklist Records");
 
@@ -243,18 +244,19 @@ public class ChecklistRecordsService {
 
         int rowNum = 1;
         for (ChecklistRecords record : records) {
-            Row row = sheet.createRow(rowNum);
+            System.out.println("Processing record ID: " + record.getChecklistId()); // Debug log
+            Row row = sheet.createRow(rowNum++);
 
-            row.createCell(0).setCellValue(String.valueOf(record.getChecklistId() != null ? record.getChecklistId() : ""));
+            row.createCell(0).setCellValue(Optional.ofNullable(record.getChecklistId()).orElse(Long.valueOf("")));
             row.createCell(1).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
-            row.createCell(2).setCellValue(record.getMachineCode() != null ? record.getMachineCode() : "");
-            row.createCell(3).setCellValue(record.getMachineName() != null ? record.getMachineName() : "");
-            row.createCell(4).setCellValue(record.getMachineStatus() != null ? record.getMachineStatus() : "");
-            row.createCell(5).setCellValue(record.getMachineChecklist() != null ? record.getMachineChecklist() : "");
-            row.createCell(6).setCellValue(record.getMachineNote() != null ? record.getMachineNote() : "");
-            row.createCell(7).setCellValue(record.getMachineImage() != null ? record.getMachineImage() : "");
-            row.createCell(8).setCellValue(record.getUserId() != null ? record.getUserId() : "");
-            row.createCell(9).setCellValue(record.getUserName() != null ? record.getUserName() : "");
+            row.createCell(2).setCellValue(Optional.ofNullable(record.getMachineCode()).orElse(""));
+            row.createCell(3).setCellValue(Optional.ofNullable(record.getMachineName()).orElse(""));
+            row.createCell(4).setCellValue(Optional.ofNullable(record.getMachineStatus()).orElse(""));
+            row.createCell(5).setCellValue(Optional.ofNullable(record.getMachineChecklist()).orElse(""));
+            row.createCell(6).setCellValue(Optional.ofNullable(record.getMachineNote()).orElse(""));
+            row.createCell(7).setCellValue(Optional.ofNullable(record.getMachineImage()).orElse(""));
+            row.createCell(8).setCellValue(Optional.ofNullable(record.getUserId()).orElse(""));
+            row.createCell(9).setCellValue(Optional.ofNullable(record.getUserName()).orElse(""));
 
             Cell dateCreatedCell = row.createCell(10);
             if (record.getDateCreated() != null) {
@@ -262,7 +264,7 @@ public class ChecklistRecordsService {
                 dateCreatedCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(11).setCellValue(record.getSupervisor() != null ? record.getSupervisor() : "");
+            row.createCell(11).setCellValue(Optional.ofNullable(record.getSupervisor()).orElse(""));
 
             Cell dateSupervisorCell = row.createCell(12);
             if (record.getDateSupervisorChecked() != null) {
@@ -270,7 +272,7 @@ public class ChecklistRecordsService {
                 dateSupervisorCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(13).setCellValue(record.getManager() != null ? record.getManager() : "");
+            row.createCell(13).setCellValue(Optional.ofNullable(record.getManager()).orElse(""));
 
             Cell dateManagerCell = row.createCell(14);
             if (record.getDateManagerChecked() != null) {
@@ -278,12 +280,12 @@ public class ChecklistRecordsService {
                 dateManagerCell.setCellStyle(dateCellStyle);
             }
 
-            row.createCell(15).setCellValue(record.getChecklistStatus() != null ? record.getChecklistStatus() : "");
-            row.createCell(16).setCellValue(record.getReasonNotChecked() != null ? record.getReasonNotChecked() : "");
-            row.createCell(17).setCellValue(record.getJobDetails() != null ? record.getJobDetails() : "");
+            row.createCell(15).setCellValue(Optional.ofNullable(record.getChecklistStatus()).orElse(""));
+            row.createCell(16).setCellValue(Optional.ofNullable(record.getReasonNotChecked()).orElse(""));
+            row.createCell(17).setCellValue(Optional.ofNullable(record.getJobDetails()).orElse(""));
         }
 
-        // Auto-size columns (optional, as we set widths manually)
+        // Auto-size columns
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
