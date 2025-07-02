@@ -7,10 +7,15 @@ import com.machinechecklist.repo.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -208,5 +213,85 @@ public class ChecklistRecordsService {
 
         machineRepo.save(machine);
         return checklistRecordsRepo.save(checklist);
+    }
+
+    public byte[] exportChecklistToExcel() throws IOException {
+        List<ChecklistRecords> records = checklistRecordsRepo.findAll();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Checklist Records");
+
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {"Checklist ID", "Recheck", "Machine Code", "Machine Name", "Machine Status",
+                "Machine Checklist", "Machine Note", "Machine Image", "User ID", "User Name",
+                "Date Created", "Supervisor", "Date Supervisor Checked", "Manager",
+                "Date Manager Checked", "Checklist Status", "Reason Not Checked", "Job Details"};
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd hh:mm:ss"));
+
+        int rowNum = 1;
+        for (ChecklistRecords record : records) {
+            Row row = sheet.createRow(rowNum);
+
+            row.createCell(0).setCellValue(String.valueOf(record.getChecklistId() != null ? record.getChecklistId() : ""));
+            row.createCell(1).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
+            row.createCell(2).setCellValue(record.getMachineCode() != null ? record.getMachineCode() : "");
+            row.createCell(3).setCellValue(record.getMachineName() != null ? record.getMachineName() : "");
+            row.createCell(4).setCellValue(record.getMachineStatus() != null ? record.getMachineStatus() : "");
+            row.createCell(5).setCellValue(record.getMachineChecklist() != null ? record.getMachineChecklist() : "");
+            row.createCell(6).setCellValue(record.getMachineNote() != null ? record.getMachineNote() : "");
+            row.createCell(7).setCellValue(record.getMachineImage() != null ? record.getMachineImage() : "");
+            row.createCell(8).setCellValue(record.getUserId() != null ? record.getUserId() : "");
+            row.createCell(9).setCellValue(record.getUserName() != null ? record.getUserName() : "");
+
+            Cell dateCreatedCell = row.createCell(10);
+            if (record.getDateCreated() != null) {
+                dateCreatedCell.setCellValue(record.getDateCreated());
+                dateCreatedCell.setCellStyle(dateCellStyle);
+            }
+
+            row.createCell(11).setCellValue(record.getSupervisor() != null ? record.getSupervisor() : "");
+
+            Cell dateSupervisorCell = row.createCell(12);
+            if (record.getDateSupervisorChecked() != null) {
+                dateSupervisorCell.setCellValue(record.getDateSupervisorChecked());
+                dateSupervisorCell.setCellStyle(dateCellStyle);
+            }
+
+            row.createCell(13).setCellValue(record.getManager() != null ? record.getManager() : "");
+
+            Cell dateManagerCell = row.createCell(14);
+            if (record.getDateManagerChecked() != null) {
+                dateManagerCell.setCellValue(record.getDateManagerChecked());
+                dateManagerCell.setCellStyle(dateCellStyle);
+            }
+
+            row.createCell(15).setCellValue(record.getChecklistStatus() != null ? record.getChecklistStatus() : "");
+            row.createCell(16).setCellValue(record.getReasonNotChecked() != null ? record.getReasonNotChecked() : "");
+            row.createCell(17).setCellValue(record.getJobDetails() != null ? record.getJobDetails() : "");
+        }
+
+        // Auto-size columns (optional, as we set widths manually)
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write to byte array
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        return outputStream.toByteArray();
     }
 }
