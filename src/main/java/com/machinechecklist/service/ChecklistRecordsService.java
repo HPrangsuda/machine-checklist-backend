@@ -2,6 +2,7 @@ package com.machinechecklist.service;
 
 import com.machinechecklist.dto.ChecklistItemDTO;
 import com.machinechecklist.model.*;
+import com.machinechecklist.model.enums.Frequency;
 import com.machinechecklist.repo.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -32,20 +33,45 @@ public class ChecklistRecordsService {
 
     @Scheduled(cron = "0 1 0 * * MON")
     @Transactional
-    public void updateOverdueChecklists() {
+    public void updateOverdueChecklistsWeek() {
         List<ChecklistRecords> pendingRecords = checklistRecordsRepo.findByChecklistStatusIn(
                 List.of("รอหัวหน้างานตรวจสอบ", "รอผู้จัดการฝ่ายตรวจสอบ")
         );
 
         for (ChecklistRecords record : pendingRecords) {
-            String currentStatus = record.getChecklistStatus();
-            record.setChecklistStatus(currentStatus + "-เกินกำหนด");
-            checklistRecordsRepo.save(record);
-
             Machine machine = machineRepo.findByMachineCode(record.getMachineCode())
-                    .orElseThrow(() -> new RuntimeException("Machine not found with code: " + record.getMachineCode()));
-            machine.setCheckStatus("รอดำเนินการ");
-            machineRepo.save(machine);
+                    .orElseThrow(() -> new RuntimeException("ไม่พบเครื่องจักรที่มีรหัส: " + record.getMachineCode()));
+
+            if (machine.getResetPeriod() == Frequency.WEEKLY) {
+                String currentStatus = record.getChecklistStatus();
+                record.setChecklistStatus(currentStatus + "-เกินกำหนด");
+                checklistRecordsRepo.save(record);
+
+                machine.setCheckStatus("รอดำเนินการ");
+                machineRepo.save(machine);
+            }
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 1 * *")
+    @Transactional
+    public void updateOverdueChecklistsMonth() {
+        List<ChecklistRecords> pendingRecords = checklistRecordsRepo.findByChecklistStatusIn(
+                List.of("รอหัวหน้างานตรวจสอบ", "รอผู้จัดการฝ่ายตรวจสอบ")
+        );
+
+        for (ChecklistRecords record : pendingRecords) {
+            Machine machine = machineRepo.findByMachineCode(record.getMachineCode())
+                    .orElseThrow(() -> new RuntimeException("ไม่พบเครื่องจักรที่มีรหัส: " + record.getMachineCode()));
+
+            if (machine.getResetPeriod() == Frequency.MONTHLY) {
+                String currentStatus = record.getChecklistStatus();
+                record.setChecklistStatus(currentStatus + "-เกินกำหนด");
+                checklistRecordsRepo.save(record);
+
+                machine.setCheckStatus("รอดำเนินการ");
+                machineRepo.save(machine);
+            }
         }
     }
 

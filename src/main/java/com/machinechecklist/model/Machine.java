@@ -1,5 +1,6 @@
 package com.machinechecklist.model;
 
+import com.machinechecklist.model.enums.Frequency;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,4 +38,7 @@ public class Machine {
     private String machineTypeName;
     private String checkStatus;
     private String qrCode;
+
+    @Enumerated(EnumType.STRING)
+    private Frequency resetPeriod;
 }
