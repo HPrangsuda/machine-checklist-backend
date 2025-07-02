@@ -1,5 +1,6 @@
 package com.machinechecklist.service;
 
+import com.google.zxing.WriterException;
 import com.machinechecklist.dto.ChecklistItemDTO;
 import com.machinechecklist.model.*;
 import com.machinechecklist.model.enums.Frequency;
@@ -217,7 +218,6 @@ public class ChecklistRecordsService {
 
     public byte[] exportChecklistToExcel() throws IOException {
         List<ChecklistRecords> records = checklistRecordsRepo.findAll();
-
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Checklist Records");
 
@@ -238,54 +238,20 @@ public class ChecklistRecordsService {
             cell.setCellStyle(headerStyle);
         }
 
-        CellStyle dateCellStyle = workbook.createCellStyle();
-        CreationHelper createHelper = workbook.getCreationHelper();
-        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd hh:mm:ss"));
-
+        // Data rows
         int rowNum = 1;
-        for (ChecklistRecords record : records) {
-            System.out.println("Processing record ID: " + record.getChecklistId()); // Debug log
-            Row row = sheet.createRow(rowNum++);
+        for (ChecklistRecords checklistRecord : records) {
+            Row row = sheet.createRow(rowNum);
 
-            row.createCell(0).setCellValue(String.valueOf(record.getChecklistId() != null ? record.getChecklistId() : ""));
-            row.createCell(1).setCellValue(record.getRecheck() != null ? record.getRecheck() : false);
-            row.createCell(2).setCellValue(Optional.ofNullable(record.getMachineCode()).orElse(""));
-            row.createCell(3).setCellValue(Optional.ofNullable(record.getMachineName()).orElse(""));
-            row.createCell(4).setCellValue(Optional.ofNullable(record.getMachineStatus()).orElse(""));
-            row.createCell(5).setCellValue(Optional.ofNullable(record.getMachineChecklist()).orElse(""));
-            row.createCell(6).setCellValue(Optional.ofNullable(record.getMachineNote()).orElse(""));
-            row.createCell(7).setCellValue(Optional.ofNullable(record.getMachineImage()).orElse(""));
-            row.createCell(8).setCellValue(Optional.ofNullable(record.getUserId()).orElse(""));
-            row.createCell(9).setCellValue(Optional.ofNullable(record.getUserName()).orElse(""));
+            Cell nameCell = row.createCell(0);
+            nameCell.setCellValue(String.valueOf(checklistRecord.getChecklistId() != null ? checklistRecord.getChecklistId() : ""));
 
-            Cell dateCreatedCell = row.createCell(10);
-            if (record.getDateCreated() != null) {
-                dateCreatedCell.setCellValue(record.getDateCreated());
-                dateCreatedCell.setCellStyle(dateCellStyle);
-            }
+            Cell codeCell = row.createCell(1);
+            codeCell.setCellValue(checklistRecord.getChecklistStatus() != null ? checklistRecord.getChecklistStatus() : "");
 
-            row.createCell(11).setCellValue(Optional.ofNullable(record.getSupervisor()).orElse(""));
-
-            Cell dateSupervisorCell = row.createCell(12);
-            if (record.getDateSupervisorChecked() != null) {
-                dateSupervisorCell.setCellValue(record.getDateSupervisorChecked());
-                dateSupervisorCell.setCellStyle(dateCellStyle);
-            }
-
-            row.createCell(13).setCellValue(Optional.ofNullable(record.getManager()).orElse(""));
-
-            Cell dateManagerCell = row.createCell(14);
-            if (record.getDateManagerChecked() != null) {
-                dateManagerCell.setCellValue(record.getDateManagerChecked());
-                dateManagerCell.setCellStyle(dateCellStyle);
-            }
-
-            row.createCell(15).setCellValue(Optional.ofNullable(record.getChecklistStatus()).orElse(""));
-            row.createCell(16).setCellValue(Optional.ofNullable(record.getReasonNotChecked()).orElse(""));
-            row.createCell(17).setCellValue(Optional.ofNullable(record.getJobDetails()).orElse(""));
         }
 
-        // Auto-size columns
+        // Auto-size columns (optional, as we set widths manually)
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
