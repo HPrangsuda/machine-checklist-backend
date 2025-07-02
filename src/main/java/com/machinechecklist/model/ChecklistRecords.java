@@ -3,7 +3,6 @@ package com.machinechecklist.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -43,5 +42,5 @@ public class ChecklistRecords {
 
     private String checklistStatus;
     private String reasonNotChecked;
-    private String jobDetails;
+    private String jobDetail;
 }

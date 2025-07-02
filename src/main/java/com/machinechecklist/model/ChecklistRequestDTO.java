@@ -20,5 +20,5 @@ public class ChecklistRequestDTO {
     private String supervisor;
     private String manager;
     private String reasonNotChecked;
-    private String jobDetails;
+    private String jobDetail;
 }

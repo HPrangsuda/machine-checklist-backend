@@ -129,7 +129,7 @@ public class ChecklistRecordsService {
             record.setSupervisor(request.getSupervisor());
             record.setManager(request.getManager());
             record.setDateCreated(new Date());
-            record.setJobDetails(request.getJobDetails());
+            record.setJobDetail(request.getJobDetail());
 
             if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus()) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                 if (machine.getSupervisorId() != null) {
@@ -279,7 +279,7 @@ public class ChecklistRecordsService {
             row.createCell(13).setCellValue(Optional.ofNullable(record.getMachineNote()).orElse(""));
             row.createCell(14).setCellValue(Optional.ofNullable(record.getMachineImage()).orElse(""));
             row.createCell(15).setCellValue(Optional.ofNullable(record.getReasonNotChecked()).orElse(""));
-            row.createCell(16).setCellValue(Optional.ofNullable(record.getJobDetails()).orElse(""));
+            row.createCell(16).setCellValue(Optional.ofNullable(record.getJobDetail()).orElse(""));
             row.createCell(17).setCellValue(Optional.ofNullable(record.getMachineChecklist()).orElse(""));
         }
 
