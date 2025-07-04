@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,7 +60,9 @@ public class MachineService {
     }
 
     public List<Machine> getMachinesByResponsiblePerson(String personId) {
-        return machineRepo.findByResponsiblePersonId(personId);
+        return machineRepo.findByResponsiblePersonId(personId).stream()
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .collect(Collectors.toList());
     }
 
     public List<Machine> getMachinesByResponsibleAll(String personId) {

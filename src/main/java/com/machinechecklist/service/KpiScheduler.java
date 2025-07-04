@@ -32,7 +32,10 @@ public class KpiScheduler {
         YearMonth yearMonth = YearMonth.of(currentDate.getYear(), currentDate.getMonth());
         int fridays = countFridaysInMonth(yearMonth);
 
-        List<Machine> machines = machineRepo.findAll();
+        List<Machine> machines = machineRepo.findAll().stream()
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .toList();
+
         Map<String, Long> machineCountByResponsiblePerson = machines.stream()
                 .filter(machine -> machine.getResponsiblePersonId() != null)
                 .collect(Collectors.groupingBy(

@@ -29,7 +29,9 @@ public class ChecklistAutoSaveService {
         Date startOfWeek = Date.from(monday.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endOfWeek = Date.from(friday.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
-        List<Machine> machines = machineRepo.findAll();
+        List<Machine> machines = machineRepo.findAll().stream()
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .toList();
 
         for (Machine machine : machines) {
             String responsibleId = machine.getResponsiblePersonId();
