@@ -42,17 +42,20 @@ public class KpiService {
     }
 
     public void updateOrCreateKpi(String responsiblePersonId, String year, String month) {
-        long machineCount = machineRepo.countByResponsiblePersonId(responsiblePersonId);
+        long machineCount = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .count();
 
         YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
         int fridays = countFridaysInMonth(yearMonth);
-
 
         User user = userRepo.findByUsername(responsiblePersonId)
                 .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
         String employeeName = user.getFirstName() + " " + user.getLastName();
 
-        Optional<Machine> machine = machineRepo.findFirstByResponsiblePersonId(responsiblePersonId);
+        Optional<Machine> machine = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
+                .filter(machine1 -> !"ยกเลิกใช้งาน".equals(machine1.getMachineStatus()))
+                .findFirst();
         if (machine.isEmpty()) {
             throw new RuntimeException("No machine found for responsiblePersonId: " + responsiblePersonId);
         }
