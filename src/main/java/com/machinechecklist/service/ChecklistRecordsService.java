@@ -185,7 +185,7 @@ public class ChecklistRecordsService {
         String reasonNotChecked = request.getReasonNotChecked();
 
         if ("รอหัวหน้างานตรวจสอบ".equals(checklist.getChecklistStatus())) {
-            if (machine.getManagerId() == null) {
+            if (machine.getManagerId() == null || machine.getManagerId().isEmpty()) {
                 checklist.setChecklistStatus("ดำเนินการเสร็จสิ้น");
                 checklist.setReasonNotChecked(request.getReasonNotChecked());
                 checklist.setDateSupervisorChecked(new Date());
