@@ -19,7 +19,7 @@ public class ChecklistAutoSaveService {
     private final MachineRepo machineRepo;
     private final ChecklistRecordsRepo checklistRecordsRepo;
 
-    @Scheduled(cron = "0 30 20 * * SAT")
+    @Scheduled(cron = "0 59 23 * * FRI")
     @Transactional
     public void autoSaveChecklistRecords() {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
