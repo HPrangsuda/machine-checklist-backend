@@ -77,7 +77,7 @@ public class KpiScheduler {
         });
     }
 
-    @Scheduled(cron = "0 30 23 * * *")
+    @Scheduled(cron = "0 10 10 * * *")
     @Transactional
     public void recalculateCurrentMonthKpi() {
         LocalDate currentDate = LocalDate.now();
