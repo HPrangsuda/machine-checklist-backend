@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -307,5 +308,46 @@ public class ChecklistRecordsService {
         workbook.write(outputStream);
         workbook.close();
         return outputStream.toByteArray();
+    }
+
+    public List<ChecklistRecords> getRecordByPeriod(String employeeId, String year, String month) {
+        try {
+            if (employeeId == null || employeeId.trim().isEmpty()) {
+                throw new IllegalArgumentException("EmployeeId cannot be null or empty");
+            }
+            if (year == null || month == null) {
+                throw new IllegalArgumentException("Year and month cannot be null");
+            }
+
+            YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
+
+            LocalDate firstMonday = getFirstMondayOfWeekContainingFirstDay(yearMonth);
+            LocalDate lastFriday = getLastFridayOfMonth(yearMonth);
+
+            return checklistRecordsRepo.findByUserIdAndDateRange(
+                    employeeId,
+                    firstMonday.atStartOfDay(),
+                    lastFriday.atTime(23, 59, 59)
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve checklist records: " + e.getMessage(), e);
+        }
+    }
+
+    private LocalDate getFirstMondayOfWeekContainingFirstDay(YearMonth yearMonth) {
+        LocalDate date = yearMonth.atDay(1);
+        while (date.getDayOfWeek().getValue() != 1) { // ค้นหาวันจันทร์
+            date = date.minusDays(1);
+        }
+        return date;
+    }
+
+    private LocalDate getLastFridayOfMonth(YearMonth yearMonth) {
+        LocalDate date = yearMonth.atEndOfMonth();
+        while (date.getDayOfWeek().getValue() != 5) { // ค้นหาวันศุกร์
+            date = date.minusDays(1);
+        }
+        return date;
     }
 }

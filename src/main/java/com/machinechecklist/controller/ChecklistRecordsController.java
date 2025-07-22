@@ -31,6 +31,15 @@ public class ChecklistRecordsController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("period/{employeeId}")
+    public ResponseEntity<List<ChecklistRecords>> getRecordByPeriod(
+            @PathVariable String employeeId,
+            @RequestParam String year,
+            @RequestParam String month) {
+        List<ChecklistRecords> records = checklistRecordsService.getRecordByPeriod(employeeId, year, month);
+        return ResponseEntity.ok(records);
+    }
+
     @GetMapping("/department/{personId}")
     public ResponseEntity<List<ChecklistRecords>> getRecordByDepartment(@PathVariable String personId) {
         List<ChecklistRecords> records = checklistRecordsService.getChecklistRecordsByUserId(personId);
