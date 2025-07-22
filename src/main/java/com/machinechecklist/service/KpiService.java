@@ -42,57 +42,85 @@ public class KpiService {
     }
 
     public void updateOrCreateKpi(String responsiblePersonId, String year, String month) {
-        long machineCount = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
-                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
-                .count();
+        try {
+            if (responsiblePersonId == null || responsiblePersonId.trim().isEmpty()) {
+                throw new IllegalArgumentException("ResponsiblePersonId cannot be null or empty");
+            }
+            if (year == null || month == null) {
+                throw new IllegalArgumentException("Year and month cannot be null");
+            }
 
-        YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
-        int fridays = countFridaysInMonth(yearMonth);
+            long machineCount = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
+                    .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                    .count();
 
-        User user = userRepo.findByUsername(responsiblePersonId)
-                .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
-        String employeeName = user.getFirstName() + " " + user.getLastName();
+            if (machineCount == 0) {
+                System.out.println("No active machines found for user: " + responsiblePersonId);
+                return;
+            }
 
-        Optional<Machine> machine = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
-                .filter(machine1 -> !"ยกเลิกใช้งาน".equals(machine1.getMachineStatus()))
-                .findFirst();
-        if (machine.isEmpty()) {
-            throw new RuntimeException("No machine found for responsiblePersonId: " + responsiblePersonId);
+            YearMonth yearMonth = YearMonth.of(Integer.parseInt(year), Integer.parseInt(month));
+            int fridays = countFridaysInMonth(yearMonth);
+
+            User user = userRepo.findByUsername(responsiblePersonId)
+                    .orElseThrow(() -> new RuntimeException("User not found for ID: " + responsiblePersonId));
+            String employeeName = user.getFirstName() + " " + user.getLastName();
+
+            Optional<Machine> machine = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
+                    .filter(machine1 -> !"ยกเลิกใช้งาน".equals(machine1.getMachineStatus()))
+                    .findFirst();
+
+            if (machine.isEmpty()) {
+                System.out.println("No active machine found for responsiblePersonId: " + responsiblePersonId);
+                return;
+            }
+
+            String managerId = machine.get().getManagerId();
+            String supervisorId = machine.get().getSupervisorId();
+
+            Optional<Kpi> existingKpi = kpiRepo.findByEmployeeIdAndYearAndMonth(responsiblePersonId, year, month);
+            Kpi kpi;
+
+            if (existingKpi.isPresent()) {
+                kpi = existingKpi.get();
+                // Calculate date range: first Monday of the week containing day 1 to last Friday of the month
+                LocalDate firstMonday = getFirstMondayOfWeekContainingFirstDay(yearMonth);
+                LocalDate lastFriday = getLastFridayOfMonth(yearMonth);
+
+                // Count checklist records for the update where userId = employeeId and reason_not_checked condition
+                long checkedCount = checklistRecordsRepo.countByUserIdAndDateRangeAndReasonNotChecked(
+                        responsiblePersonId,
+                        firstMonday.atStartOfDay(),
+                        lastFriday.atTime(23, 59, 59)
+                );
+
+                System.out.println("Updating existing KPI - CheckedCount: " + checkedCount + ", CheckAll: " + (fridays * machineCount));
+
+                kpi.setCheckAll(fridays * machineCount);
+                kpi.setChecked(checkedCount);
+                kpi.setEmployeeName(employeeName);
+                kpi.setManagerId(managerId);
+                kpi.setSupervisorId(supervisorId);
+            } else {
+                System.out.println("Creating new KPI record");
+                kpi = new Kpi();
+                kpi.setEmployeeId(responsiblePersonId);
+                kpi.setYear(year);
+                kpi.setMonth(month);
+                kpi.setCheckAll(fridays * machineCount);
+                kpi.setChecked(0L); // Will be updated in next call
+                kpi.setEmployeeName(employeeName);
+                kpi.setManagerId(managerId);
+                kpi.setSupervisorId(supervisorId);
+            }
+
+            Kpi savedKpi = kpiRepo.save(kpi);
+            System.out.println("KPI saved with ID: " + savedKpi.getId());
+
+        } catch (Exception e) {
+            System.err.println("Error in updateOrCreateKpi: " + e.getMessage());
+            throw new RuntimeException("Failed to update KPI: " + e.getMessage(), e);
         }
-        String managerId = machine.get().getManagerId();
-        String supervisorId = machine.get().getSupervisorId();
-
-        Optional<Kpi> existingKpi = kpiRepo.findByEmployeeIdAndYearAndMonth(responsiblePersonId, year, month);
-        Kpi kpi;
-        if (existingKpi.isPresent()) {
-            kpi = existingKpi.get();
-            // Calculate date range: first Monday of the week containing day 1 to last Friday of the month
-            LocalDate firstMonday = getFirstMondayOfWeekContainingFirstDay(yearMonth);
-            LocalDate lastFriday = getLastFridayOfMonth(yearMonth);
-            // Count checklist records for the update where userId = employeeId and reason_not_checked condition
-            long checkedCount = checklistRecordsRepo.countByUserIdAndDateRangeAndReasonNotChecked(
-                    responsiblePersonId,
-                    firstMonday.atStartOfDay(),
-                    lastFriday.atTime(23, 59, 59)
-            );
-            kpi.setCheckAll(fridays * machineCount);
-            kpi.setChecked(checkedCount); // Update with sum from checklist_record
-            kpi.setEmployeeName(employeeName);
-            kpi.setManagerId(managerId);
-            kpi.setSupervisorId(supervisorId);
-        } else {
-            kpi = new Kpi();
-            kpi.setEmployeeId(responsiblePersonId);
-            kpi.setYear(year);
-            kpi.setMonth(month);
-            kpi.setCheckAll(fridays * machineCount);
-            kpi.setChecked(0L);
-            kpi.setEmployeeName(employeeName);
-            kpi.setManagerId(managerId);
-            kpi.setSupervisorId(supervisorId);
-        }
-
-        kpiRepo.save(kpi);
     }
 
     private int countFridaysInMonth(YearMonth yearMonth) {

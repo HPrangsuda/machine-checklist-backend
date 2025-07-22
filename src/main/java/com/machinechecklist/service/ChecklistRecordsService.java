@@ -131,13 +131,20 @@ public class ChecklistRecordsService {
             record.setDateCreated(new Date());
             record.setJobDetail(request.getJobDetail());
 
-            if (Objects.equals(responsibleId, record.getUserId()) && "รอดำเนินการ".equals(machine.getCheckStatus()) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) && !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            boolean shouldUpdateKpi = false;
+
+            if (Objects.equals(responsibleId, record.getUserId()) &&
+                    "รอดำเนินการ".equals(machine.getCheckStatus()) &&
+                    !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) &&
+                    !LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+
                 if (machine.getSupervisorId() != null) {
                     record.setChecklistStatus("รอหัวหน้างานตรวจสอบ");
                 } else {
                     record.setChecklistStatus("รอผู้จัดการฝ่ายตรวจสอบ");
                 }
                 record.setRecheck(true);
+                shouldUpdateKpi = true;
 
                 // Update checkStatus in machineChecklist
                 for (ChecklistItemDTO item : request.getChecklistItems()) {
@@ -151,12 +158,6 @@ public class ChecklistRecordsService {
                     }
                 }
 
-                // KPI
-                LocalDate currentDate = LocalDate.now();
-                String year = String.valueOf(currentDate.getYear());
-                String monthStr = String.format("%02d", currentDate.getMonthValue());
-                kpiService.updateOrCreateKpi(responsibleId, year, monthStr);
-
                 machine.setCheckStatus(record.getChecklistStatus());
             } else {
                 record.setChecklistStatus("ดำเนินการเสร็จสิ้น");
@@ -168,9 +169,24 @@ public class ChecklistRecordsService {
             machine.setMachineStatus(savedRecord.getMachineStatus());
             machineRepo.save(machine);
 
+            if (shouldUpdateKpi) {
+                try {
+                    LocalDate currentDate = LocalDate.now();
+                    String year = String.valueOf(currentDate.getYear());
+                    String monthStr = String.format("%02d", currentDate.getMonthValue());
+
+                    System.out.println("Updating KPI for user: " + responsibleId + ", Year: " + year + ", Month: " + monthStr);
+
+                    kpiService.updateOrCreateKpi(responsibleId, year, monthStr);
+
+                    System.out.println("KPI updated successfully for user: " + responsibleId);
+                } catch (Exception kpiException) {
+                    System.err.println("Failed to update KPI: " + kpiException.getMessage());
+                }
+            }
             return savedRecord;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to save checklist record: " + e.getMessage());
+            throw new RuntimeException("Failed to save checklist record: " + e.getMessage(), e);
         }
     }
 
