@@ -27,7 +27,7 @@ public class KpiScheduler {
     private final KpiRepo kpiRepo;
     private final ChecklistRecordsRepo checklistRecordsRepo;
 
-    @Scheduled(cron = "0 15 0 1 * ?")
+    @Scheduled(cron = "0 1 0 1 * ?")
     @Transactional
     public void createKpiRecords() {
         LocalDate currentDate = LocalDate.now();
@@ -77,7 +77,7 @@ public class KpiScheduler {
         });
     }
 
-    @Scheduled(cron = "0 30 23 * * *")
+    @Scheduled(cron = "0 30 0 * * *")
     @Transactional
     public void recalculateCurrentMonthKpi() {
         LocalDate currentDate = LocalDate.now();
