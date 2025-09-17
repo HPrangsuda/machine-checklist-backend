@@ -13,6 +13,8 @@ import java.time.*;
 import java.util.Date;
 import java.util.List;
 
+import static com.machinechecklist.model.enums.Frequency.MONTHLY;
+
 @Service
 @RequiredArgsConstructor
 public class ChecklistAutoSaveService {
@@ -30,7 +32,7 @@ public class ChecklistAutoSaveService {
         Date endOfWeek = Date.from(friday.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
         List<Machine> machines = machineRepo.findAll().stream()
-                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) || machine.getResetPeriod() != MONTHLY)
                 .toList();
 
         for (Machine machine : machines) {
