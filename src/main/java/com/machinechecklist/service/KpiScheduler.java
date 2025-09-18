@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.machinechecklist.model.enums.Frequency.MONTHLY;
+
 @Service
 @RequiredArgsConstructor
 public class KpiScheduler {
@@ -38,7 +40,7 @@ public class KpiScheduler {
         int fridays = countFridaysInMonth(yearMonth);
 
         List<Machine> machines = machineRepo.findAll().stream()
-                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) && machine.getResetPeriod() != MONTHLY)
                 .toList();
 
         Map<String, Long> machineCountByResponsiblePerson = machines.stream()
@@ -97,7 +99,7 @@ public class KpiScheduler {
                 String responsiblePersonId = kpi.getEmployeeId();
 
                 long machineCount = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
-                        .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()))
+                        .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) || machine.getResetPeriod() != MONTHLY)
                         .count();
 
                 if (machineCount == 0) {
@@ -124,7 +126,7 @@ public class KpiScheduler {
                     kpi.setChecked(checkedCount);
 
                     Optional<Machine> machine = machineRepo.findByResponsiblePersonId(responsiblePersonId).stream()
-                            .filter(m -> !"ยกเลิกใช้งาน".equals(m.getMachineStatus()))
+                            .filter(m -> !"ยกเลิกใช้งาน".equals(m.getMachineStatus()) && m.getResetPeriod() != MONTHLY)
                             .findFirst();
 
                     if (machine.isPresent()) {

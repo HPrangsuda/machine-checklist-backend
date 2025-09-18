@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.machinechecklist.model.enums.Frequency.MONTHLY;
+import static com.machinechecklist.model.enums.Frequency.WEEKLY;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class ChecklistAutoSaveService {
         Date endOfWeek = Date.from(friday.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
 
         List<Machine> machines = machineRepo.findAll().stream()
-                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) || machine.getResetPeriod() != MONTHLY)
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) && machine.getResetPeriod() == WEEKLY)
                 .toList();
 
         for (Machine machine : machines) {
@@ -40,6 +41,32 @@ public class ChecklistAutoSaveService {
 
             List<ChecklistRecords> records = checklistRecordsRepo.findByMachineCodeAndUserIdAndDateCreatedBetween(
                     machine.getMachineCode(), responsibleId, startOfWeek, endOfWeek);
+
+            if (records.isEmpty()) {
+                createDefaultChecklistRecord(machine);
+            }
+        }
+    }
+
+    @Scheduled(cron = "0 59 23 1 * *")
+    @Transactional
+    public void autoSaveChecklistRecordsMonth() {
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDate firstDayOfPreviousMonth = today.minusMonths(1).withDayOfMonth(1);
+        LocalDate lastDayOfPreviousMonth = today.minusMonths(1).withDayOfMonth(today.minusMonths(1).lengthOfMonth());
+
+        Date startOfPreviousMonth = Date.from(firstDayOfPreviousMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endOfPreviousMonth = Date.from(lastDayOfPreviousMonth.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+
+        List<Machine> machines = machineRepo.findAll().stream()
+                .filter(machine -> !"ยกเลิกใช้งาน".equals(machine.getMachineStatus()) && machine.getResetPeriod() == MONTHLY)
+                .toList();
+
+        for (Machine machine : machines) {
+            String responsibleId = machine.getResponsiblePersonId();
+
+            List<ChecklistRecords> records = checklistRecordsRepo.findByMachineCodeAndUserIdAndDateCreatedBetween(
+                    machine.getMachineCode(), responsibleId, startOfPreviousMonth, endOfPreviousMonth);
 
             if (records.isEmpty()) {
                 createDefaultChecklistRecord(machine);
